@@ -9,13 +9,14 @@ class ProbingHashTable {
 public:
 	ProbingHashTable();
 	ProbingHashTable(int newProbingMethod, int newCapacity);
-	ProbingHashTable(int newProbingMethod, int numKeys, int keyRangeLB, int keyRangeUB, int valueRangeLB, int valueRangeUB);
+	ProbingHashTable(int newProbingMethod, KVPair *kvPairArray, int numKeys, bool limitPrinting);
 
 	void print() const;
-	void insert(KVPair newPair);
-	void insert(int key, int value);
-	void search(int key);
-	void deleteKey(int key);
+	void insertPrint(int index, int key) const;
+	void animatedInsert(KVPair newPair, int steps);
+	void insert(KVPair newPair, int steps);
+	int search(int key);
+	bool deleteKey(int key);
 
 	~ProbingHashTable() { }
 private:

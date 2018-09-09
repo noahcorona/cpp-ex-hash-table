@@ -7,18 +7,18 @@ using namespace std;
 
 int main() {
 	// number of holes
-	const int NUM_SLOTS = 15;
+	const int NUM_SLOTS = 5;
 
 	// number of pigeons
-	const int NUM_KEYS = 30;
+	const int NUM_KEYS = 100;
 
 	// initialize the range of the random keys
 	const int KEY_RANGE_LB = 0;
-	const int KEY_RANGE_UB = 42;
+	const int KEY_RANGE_UB = 100;
 
 	// initialize the range of the random values
 	const int VALUE_RANGE_LB = 0;
-	const int VALUE_RANGE_UB = 42;
+	const int VALUE_RANGE_UB = 10;
 
 	// print settings
 	// limit (key, value) pair printing to 100, and anything else to 50 lines
@@ -145,7 +145,139 @@ int main() {
 
 
 		} else if (inText == "2") {
-			//ProbingHashTable probingHT;
+			ProbingHashTable probingHT;
+			bool animationsOn = true;
+
+			system("cls");
+			cout << "Hash Table With Probing" << endl
+				<< "------------------------" << endl
+				<< "1. Generate hash table from random (key, value) pairs" << endl
+				<< "2. Generate empty hash table" << endl
+				<< "Anything else to exit" << endl << endl;
+
+			cin >> inText;
+
+			while (inText == "1" || inText == "2") {
+				system("cls");
+				cout << "Animation"  << endl
+					<< "---------" << endl
+					<< "1. Enabled" << endl
+					<< "2. Disabled" << endl << endl;
+				cin >> inText;
+				
+				bool animatedCreate = true;
+				if (inText == "2")
+					animatedCreate = false;
+				system("cls");
+
+				if (inText == "1") {
+					// create hash table with probing from kvPairArray
+					probingHT = ProbingHashTable(1, kvPairArray, NUM_KEYS, animatedCreate);
+				} else if (inText == "2") {
+					// create empty hash table
+					cout << "Enter probing method: " << endl
+						<< "1. Linear" << endl
+						<< "2. Quadratic" << endl
+						<< "3. Double hashing" << endl << endl;
+					cin >> inText;
+					cout << endl << endl;
+
+					int probingMethod;
+					if (inText == "1")
+						probingMethod = 1;
+					else if(inText == "2") 
+						probingMethod = 2;
+					else if (inText == "3")
+						probingMethod = 3;
+
+					cout << "Enter size: ";
+					cin >> inText;
+					cout << endl << endl;
+					probingHT = ProbingHashTable(probingMethod, stoi(inText));
+				}
+
+				system("pause > nul");
+				system("cls");
+				cout << "Hash Table With Probing" << endl
+					<< "------------------------" << endl
+					<< "1. Search for a key" << endl
+					<< "2. Delete a key" << endl
+					<< "3. Insert a pair" << endl
+					<< "4. Print the table" << endl
+					<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << endl
+					<< "Anything else to exit" << endl << endl;
+
+				cin >> inText;
+				cout << endl;
+
+				while (inText == "1" || inText == "2" || inText == "3" || inText == "4" || inText == "5") {
+					if (inText == "1") {
+						/*
+						// search for a key
+						cout << endl << "Enter a key: ";
+						string word;
+						cin >> word;
+
+						int foundInSteps = probingHT.search(stoi((word)));
+
+						if (foundInSteps != -1) {
+							cout << "Found key (" << word << ") in " << foundInSteps << " steps" << endl << endl;
+						}
+						else {
+							cout << "Key not found. " << endl << endl;
+						}
+						*/
+					} else if (inText == "2") {
+						/*
+						// delete a key
+						cout << endl << "Enter a key: ";
+						string word;
+						cin >> word;
+
+						bool deleted = probingHT.deleteKey(stoi(word));
+
+						if (deleted)
+							cout << "Deleted key " << word << ".";
+						else
+							"Key not found.";
+
+						cout << endl << endl;
+						*/
+					} else if (inText == "3") {
+						// insert a (key, value) pair
+						/*
+						string key;
+						string value;
+
+						cout << endl << "Enter a key: ";
+						cin >> key;
+						cout << "Enter a value: ";
+						cin >> value;
+
+						probingHT.insert(KVPair(stoi(key), stoi(value)), 1);
+						cout << "Inserted (" + key + ", " + value + ")" << endl;
+						*/
+					} else if (inText == "4") {
+						probingHT.print();
+					} else if (inText == "5") {
+						animationsOn = !animationsOn;
+					}
+
+					system("pause > nul");
+					system("cls");
+					cout << "Hash Table With Probing" << endl
+						<< "------------------------" << endl
+						<< "1. Search for a key" << endl
+						<< "2. Delete a key" << endl
+						<< "3. Insert a pair" << endl
+						<< "4. Print the table" << endl
+						<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << endl
+						<< "Anything else to exit" << endl << endl;
+
+					cin >> inText;
+					cout << endl;
+				}
+			}
 		}
 	}
 
