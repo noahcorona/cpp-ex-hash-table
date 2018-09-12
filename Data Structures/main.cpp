@@ -7,14 +7,14 @@ using namespace std;
 int main() {
 	// initialize the range of the keys
 	const int KEY_RANGE_LB = 0;
-	const int KEY_RANGE_UB = 5;
+	const int KEY_RANGE_UB = 50;
 
 	// initialize the range of the random values (no affect on anything)
 	const int VALUE_RANGE_LB = 0;
 	const int VALUE_RANGE_UB = 10;
 
-	// number of pigeons
-	const int NUM_KEYS = KEY_RANGE_UB - KEY_RANGE_LB;
+	// number of pigeons (+ 1 is for the inclusive upper bound)
+	const int NUM_KEYS = KEY_RANGE_UB - KEY_RANGE_LB + 1;
 
 	// number of holes (for chaining, num keys != num slots)
 	const int NUM_SLOTS = 5;
@@ -26,7 +26,7 @@ int main() {
 	const bool PRINT_GENERATION = true;
 
 	// generate our randomized input data, store in key array
-	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB, VALUE_RANGE_LB, VALUE_RANGE_UB);
+	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB + 1, VALUE_RANGE_LB, VALUE_RANGE_UB);
 	int *keyArray = keyGen.keyArray;
 
 	if (PRINT_GENERATION) {
@@ -55,7 +55,7 @@ int main() {
 
 			cout << "Hash Table With Chaining" << endl
 				<< "------------------------" << endl
-				<< "1. Generate hash table from keys in (" << KEY_RANGE_UB << ", " << KEY_RANGE_UB << ")" << endl
+				<< "1. Generate hash table from keys in [" << KEY_RANGE_LB << ", " << KEY_RANGE_UB << "]" << endl
 				<< "2. Generate empty hash table" << endl
 				<< "Anything else to exit" << endl << endl;
 
@@ -147,7 +147,7 @@ int main() {
 			system("cls");
 			cout << "Hash Table With Probing" << endl
 				<< "------------------------" << endl
-				<< "1. Generate hash table from keys in (" << KEY_RANGE_UB << ", " << KEY_RANGE_UB << ")" << endl
+				<< "1. Generate hash table from keys in [" << KEY_RANGE_LB << ", " << KEY_RANGE_UB << "]" << endl
 				<< "2. Generate empty hash table" << endl
 				<< "'x' to exit" << endl << endl;
 
@@ -223,9 +223,9 @@ int main() {
 				cout << endl;
 
 				while (inText != "x") {
-					if (inText == "1") {
+					if (inText == "1") {        // search for a key (to do)
 						
-					} else if (inText == "2") {
+					} else if (inText == "2") { // delete a key (to do)
 						
 					} else if (inText == "3") { // insert a key
 						
@@ -241,9 +241,9 @@ int main() {
 							probingHT.insert(stoi(key));
 
 						inText = "1";
-					} else if (inText == "4") {
+					} else if (inText == "4") { // print the hash table
 						probingHT.print();
-					} else if (inText == "5") {
+					} else if (inText == "5") { // toggle animations
 						animationsOn = !animationsOn;
 					}
 

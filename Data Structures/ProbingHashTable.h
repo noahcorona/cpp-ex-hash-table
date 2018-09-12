@@ -20,6 +20,7 @@ private:
 	int* HT;
 	int probingMethod;
 	int capacity;
+	int functionalCapacity;
 	int numOfElements;
 
 	int prevPrime(int num) const;
