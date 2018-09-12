@@ -12,11 +12,11 @@ class ChainHashTable {
 public:
 	ChainHashTable();
 	ChainHashTable(int numSlots);
-	ChainHashTable(const KVPair *kvPairArray, int kvPairsize, int numSlots, bool limitPrinting);
+	ChainHashTable(const int *keyArray, int keyArraySize, int numSlots, bool limitPrinting);
 
 	void print() const;
 	int search(int key) const;
-	void insert(KVPair kvPair);
+	void insert(int key);
 	bool deleteKey(int key);
 
 	~ChainHashTable() { };

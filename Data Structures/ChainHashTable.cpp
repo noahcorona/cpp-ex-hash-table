@@ -12,7 +12,7 @@ ChainHashTable::ChainHashTable(int numSlots) {
 	a = new ChainNode[capacity];
 }
 
-ChainHashTable::ChainHashTable(const KVPair *kvPairArray, int kvPairSize, int numSlots, bool limitPrinting) {
+ChainHashTable::ChainHashTable(const int *keyArray, int keyArraySize, int numSlots, bool limitPrinting) {
 	// create our array
 	capacity = numSlots;
 	a = new ChainNode[capacity];
@@ -23,8 +23,8 @@ ChainHashTable::ChainHashTable(const KVPair *kvPairArray, int kvPairSize, int nu
 	}
 
 	// insert keys from array
-	for (int i = 0; i < kvPairSize; ++i) {
-		insert(kvPairArray[i]);
+	for (int i = 0; i < keyArraySize; ++i) {
+		insert(keyArray[i]);
 	}
 }
 
@@ -38,7 +38,6 @@ bool ChainHashTable::deleteKey(int key) {
 		if (trail->getNext() != nullptr) {
 			node = node->getNext();
 
-			trail->setValue(node->getValue());
 			trail->setKey(node->getKey());
 			trail->setNext(node->getNext());
 
@@ -89,16 +88,15 @@ int ChainHashTable::search(int key) const {
 	return -1;
 }
 
-void ChainHashTable::insert(KVPair kvPair) {
-	int key = kvPair.key;
-	int value = kvPair.value;
+void ChainHashTable::insert(int newKey) {
+	int key = newKey;
 	int hashedKey = hash(key);
 
 	// check if the index has no current key stored
 	ChainNode *node = &a[hashedKey];
 
 	if (node->getKey() == -1) {
-		node->setPair(kvPair);
+		node->setKey(newKey);
 	} else {
 		ChainNode *trail = node;
 		node = node->getNext();
@@ -109,7 +107,7 @@ void ChainHashTable::insert(KVPair kvPair) {
 			trail = trail->getNext();
 		}
 
-		trail->setNext(new ChainNode(kvPair));
+		trail->setNext(new ChainNode(key));
 	}
 }
 
@@ -145,11 +143,11 @@ void ChainHashTable::print() const {
 		if (node->getKey() != -1) {
 			// format and print node if not "empty"
 
-			cout << "(" << node->getKey() << ", " << node->getValue() << ")";
+			cout << "(" << node->getKey() << ")";
 			node = node->getNext();
 
 			while (node != nullptr) {
-				cout << " -> (" << node->getKey() << ", " << node->getValue() << ") ";
+				cout << " -> (" << node->getKey() << ") ";
 				node = node->getNext();
 			}
 		}

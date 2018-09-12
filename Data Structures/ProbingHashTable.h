@@ -1,26 +1,23 @@
 #ifndef PROBINGHASHTABLE
 #define PROBINGHASHTABLE
 
-#include "KVPair.h"
-
 using namespace std;
 
 class ProbingHashTable {
 public:
 	ProbingHashTable();
 	ProbingHashTable(int newProbingMethod, int newCapacity);
-	ProbingHashTable(int newProbingMethod, KVPair *kvPairArray, int numKeys, bool limitPrinting);
+	ProbingHashTable(int newProbingMethod, int *keyArray, int numKeys, bool limitPrinting);
 
 	void print() const;
-	void insertPrint(int index, int key) const;
-	void animatedInsert(KVPair newPair);
-	void insert(KVPair newPair);
+	void animatedInsert(int newKey);
+	void insert(int newKey);
 	int search(int key);
 	bool deleteKey(int key);
 
 	~ProbingHashTable() { }
 private:
-	KVPair* a;
+	int* a;
 	int probingMethod;
 	int capacity;
 	int numOfElements;

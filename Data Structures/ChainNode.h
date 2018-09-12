@@ -6,31 +6,28 @@ class ChainNode {
 
 public:
 	ChainNode() {
-		pair = KVPair(-1, -1); // "empty" slot flag
+		key = -1; // "empty" slot flag
 		next = nullptr;
 	}
 
-	ChainNode(KVPair kvPair) {
-		pair = kvPair;
+	ChainNode(int newKey) {
+		key = newKey;
 		next = nullptr;
 	}
 
-	ChainNode(KVPair kvPair, ChainNode* newNext) {
-		pair = kvPair;
+	ChainNode(int newKey, ChainNode* newNext) {
+		key = newKey;
 		next = newNext;
 	}
 
 	ChainNode* getNext() const { return next; }
-	int getKey() const { return pair.key; }
-	int getValue() const { return pair.value; }
+	int getKey() const { return key; }
 
-	void setPair(KVPair newPair) { pair = newPair; }
 	void setNext(ChainNode *newNext) { next = newNext; }
-	void setKey(int newKey) { pair.key = newKey; }
-	void setValue(int newValue) { pair.value = newValue; }
+	void setKey(int newKey) { key = newKey; }
 
 private:
-	KVPair pair;
+	int key;
 	ChainNode* next;
 };
 

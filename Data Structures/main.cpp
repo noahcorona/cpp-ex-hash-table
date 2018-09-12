@@ -8,7 +8,7 @@ using namespace std;
 int main() {
 	// initialize the range of the keys
 	const int KEY_RANGE_LB = 0;
-	const int KEY_RANGE_UB = 100;
+	const int KEY_RANGE_UB = 5;
 
 	// initialize the range of the random values (no affect on anything)
 	const int VALUE_RANGE_LB = 0;
@@ -24,17 +24,17 @@ int main() {
 	// limit (key, value) pair printing to 100, and anything else to 50 lines
 	const bool SAFE_PRINTING = false;
 	// print out any randomly generated (key, value) pairs
-	const bool PRINT_GENERATION = false;
+	const bool PRINT_GENERATION = true;
 
 	// generate our randomized input data, store in kvPairArray
 	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB, VALUE_RANGE_LB, VALUE_RANGE_UB);
-	KVPair *kvPairArray = keyGen.keyValueArray;
+	int *keyArray = keyGen.keyArray;
 
 	if (PRINT_GENERATION) {
-		cout << "Randomly generated (key, value) pairs" << endl
+		cout << "Shuffled keys" << endl
 			<< "-------------------------------------" << endl;
 		for (int i = 0; i < NUM_KEYS; ++i) {
-			cout << "   - (" << kvPairArray[i].key << ", " << kvPairArray[i].value << ")" << endl;
+			cout << "   - (" << keyArray[i] << ")" << endl;
 		}
 		cout << endl << endl;
 	}
@@ -65,7 +65,7 @@ int main() {
 			while (inText == "1" || inText == "2") {
 				if (inText == "1") {
 					// create hash table with chaining from kvPairArray
-					chainHT = ChainHashTable(kvPairArray, NUM_KEYS, NUM_SLOTS, SAFE_PRINTING);
+					chainHT = ChainHashTable(keyArray, NUM_KEYS, NUM_SLOTS, SAFE_PRINTING);
 				} else if (inText == "2") {
 					// create empty hash table
 					cout << "Enter size: ";
@@ -121,12 +121,9 @@ int main() {
 						
 						cout << endl << "Enter a key: ";
 						cin >> key;
-						//cout << "Enter a value: ";
-						//cin >> value;
 
-						chainHT.insert(KVPair(stoi(key), 0));
-						//chainHT.insert(KVPair(stoi(key), stoi(value)));
-						cout << "Inserted (" + key + ", " + value + ")" << endl;
+						chainHT.insert(stoi(key));
+						cout << "Inserted (" + key + ")" << endl;
 					} else if (inText == "4") {
 						chainHT.print();
 					}
@@ -135,7 +132,7 @@ int main() {
 						<< "------------------------" << endl
 						<< "1. Search for a key" << endl
 						<< "2. Delete a key" << endl
-						<< "3. Insert a pair" << endl
+						<< "3. Insert a key" << endl
 						<< "4. Print the table" << endl
 						<< "Anything else to exit" << endl << endl;
 
@@ -189,7 +186,7 @@ int main() {
 						probingMethod = 3;
 
 					// create hash table with probing from kvPairArray
-					probingHT = ProbingHashTable(1, kvPairArray, NUM_KEYS, animatedCreate);
+					probingHT = ProbingHashTable(1, keyArray, NUM_KEYS, animatedCreate);
 				} else if (inText == "2") {
 					// create empty hash table
 					system("cls");
@@ -219,7 +216,7 @@ int main() {
 					<< "------------------------" << endl
 					<< "1. Search for a key" << endl
 					<< "2. Delete a key" << endl
-					<< "3. Insert a pair" << endl
+					<< "3. Insert a key" << endl
 					<< "4. Print the table" << endl
 					<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
 					<< "'x' to exit" << endl << endl;
@@ -232,20 +229,18 @@ int main() {
 						
 					} else if (inText == "2") {
 						
-					} else if (inText == "3") { // insert a (key, value) pair
+					} else if (inText == "3") { // insert a key
 						
 						string key;
 						string value;
 
 						cout << endl << "Enter a key: ";
 						cin >> key;
-						//cout << "Enter a value: ";
-						//cin >> value;
 
 						if (animationsOn)
-							probingHT.animatedInsert(KVPair(stoi(key), 0));
+							probingHT.animatedInsert(stoi(key));
 						else
-							probingHT.insert(KVPair(stoi(key), 0));
+							probingHT.insert(stoi(key));
 
 						inText = "1";
 					} else if (inText == "4") {

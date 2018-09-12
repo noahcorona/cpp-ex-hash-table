@@ -37,12 +37,13 @@ public:
 			shuffleOneRandom(keyValueArray);
 
 		// create key only array
-		int *keyArray = new int[size];
+		keyArray = new int[size];
 		for (int i = 0; i < size; ++i) {
 			keyArray[i] = i;
 		}
 
 		shuffleOneRandom(keyArray);
+
 	}
 
 private:

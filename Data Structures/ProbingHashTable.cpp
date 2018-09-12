@@ -28,42 +28,50 @@ ProbingHashTable::ProbingHashTable(int newProbingMethod, int newCapacity) {
 	probingMethod = newProbingMethod;
 	capacity = newCapacity;
 	numOfElements = 0;
-	a = new KVPair[capacity];
+	a = new int[capacity];
+
+	for (int i = 0; i < capacity; ++i) {
+		a[i] = -1;
+	}
 }
 
-ProbingHashTable::ProbingHashTable(int newProbingMethod, KVPair *kvPairArray, int kvArraySize, bool animationsOn) {
+ProbingHashTable::ProbingHashTable(int newProbingMethod, int *keyArray, int keyArraySize, bool animationsOn) {
 	probingMethod = newProbingMethod;
-	capacity = kvArraySize;
-	numOfElements = kvArraySize;
-	a = new KVPair[capacity];
+	capacity = keyArraySize;
+	numOfElements = keyArraySize;
+	a = new int[capacity];
+
+	for (int i = 0; i < capacity; ++i) {
+		a[i] = -1;
+	}
 
 	// fill array with/without animations
-	for (int i = 0; i < kvArraySize; ++i)
+	for (int i = 0; i < keyArraySize; ++i)
 		if (animationsOn)
-			animatedInsert(kvPairArray[i]);
+			animatedInsert(keyArray[i]);
 		else
-			insert(kvPairArray[i]);
+			insert(keyArray[i]);
 }
 
-void ProbingHashTable::insert(KVPair pair) {
+void ProbingHashTable::insert(int key) {
 	int cycleBegin = (capacity + 1) / 2;
 	int j = 0;
 	bool inserted = false;
 	bool repeated = false;
 
 	while (!inserted && !repeated) {
-		int hashedKey = hash(pair.key, j);           // calculate hash
+		int hashedKey = hash(key, j);                // calculate hash
 
 		if (hashedKey != cycleBegin) {               // if at cycle start & not starting
-			if (a[hashedKey].key == -1) {            // probe value
-				a[hashedKey] = pair;
+			if (a[hashedKey] == -1) {                // probe value
+				a[hashedKey] = key;
 				inserted = true;                     // insert
 			} else
 				++j;
 		} else {
 			if (j == 0) {
-				if (a[hashedKey].key == -1) {        // probe value
-					a[hashedKey] = pair;
+				if (a[hashedKey] == -1) {            // probe value
+					a[hashedKey] = key;
 					inserted = true;                 // insert
 				} else
 					++j;
@@ -72,10 +80,10 @@ void ProbingHashTable::insert(KVPair pair) {
 		}
 	}
 
-	if (repeated) {
+	if (!inserted || repeated) {
 		// create new array with next prime
 		int newCapacity = nextPrime(capacity * 2);
-		KVPair *newArray = new KVPair[newCapacity];
+		int *newArray = new int[newCapacity];
 
 		// traverse linearly, rehash, insert
 		for (int i = 0; i < capacity; ++i) {
@@ -83,8 +91,8 @@ void ProbingHashTable::insert(KVPair pair) {
 			inserted = false;
 
 			while (!inserted) {
-				int hashedKey = hash(pair.key, j);    // calculate hash
-				if (newArray[hashedKey].key == -1) {  // probe value
+				int hashedKey = hash(key, j);       // calculate hash
+				if (newArray[hashedKey] == -1) {    // probe value
 					newArray[hashedKey] = a[i];
 					inserted = true;
 				} else
@@ -102,9 +110,9 @@ void ProbingHashTable::insert(KVPair pair) {
 		inserted = false;
 
 		while (!inserted) {
-			int hashedKey = hash(pair.key, j);       // calculate hash
-			if (a[hashedKey].key == -1) {            // probe value
-				a[hashedKey] = pair;
+			int hashedKey = hash(key, j);          // calculate hash
+			if (a[hashedKey] == -1) {              // probe value
+				a[hashedKey] = key;
 				inserted = true;
 			} else
 				++j;
@@ -112,47 +120,47 @@ void ProbingHashTable::insert(KVPair pair) {
 	}
 }
 
-void ProbingHashTable::animatedInsert(KVPair pair) {
+void ProbingHashTable::animatedInsert(int key) {
 	int cycleBegin = (capacity + 1) / 2;
 	int j = 0;
 	bool inserted = false;
 	bool repeated = false;
 
 	system("cls");
-	cout << " Attempting to insert " << pair.key << endl
+	cout << " Attempting to insert " << key << endl
 		<< "------------------------------" << endl << endl;
 	for (int i = 0; i < capacity; ++i) {
-		if (i == hash(pair.key, 0)) {
+		if (i == hash(key, 0)) {
 			// print UPDATED key and dont print empty kv pairs
 			if (j == (capacity + 1) / 2) {
-				cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")   CYCLE START" << endl;
+				cout << "   " << i << ". (" << a[i] << ")   CYCLE START" << endl;
 			}
-			else if (a[i].key == -1)
-				cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")   SUCCESS" << endl;
+			else if (a[i] == -1)
+				cout << "   " << i << ". (" << a[i] << ")   SUCCESS" << endl;
 			else
-				cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")   FAIL" << endl;
+				cout << "   " << i << ". (" << a[i] << ")   FAIL" << endl;
 		}
 		else
-			if (a[i].key != -1)
-				cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")" << endl;
+			if (a[i] != -1)
+				cout << "   " << i << ". (" << a[i] << ")" << endl;
 			else
 				cout << "   " << i << ". " << endl;
 
 	}
 
 	while (!inserted && !repeated) {
-		int hashedKey = hash(pair.key, j);           // calculate hash
+		int hashedKey = hash(key, j);                // calculate hash
 
 		if (hashedKey != cycleBegin) {               // if at cycle start & not starting
-				if (a[hashedKey].key == -1) {        // probe value
-					a[hashedKey] = pair;
+				if (a[hashedKey] == -1) {            // probe value
+					a[hashedKey] = key;
 					inserted = true;                 // insert
 				} else
 					++j;
 		} else {
 			if (j == 0) {
-				if (a[hashedKey].key == -1) {        // probe value
-					a[hashedKey] = pair;
+				if (a[hashedKey] == -1) {            // probe value
+					a[hashedKey] = key;
 					inserted = true;                 // insert
 				} else
 					++j;
@@ -161,19 +169,23 @@ void ProbingHashTable::animatedInsert(KVPair pair) {
 		}
 	}
 
-	if (repeated) {
+	if (!inserted || repeated) {
 		// create new array with next prime
 		int newCapacity = nextPrime(capacity * 2);
-		KVPair *newArray = new KVPair[newCapacity];
+		int *newArray = new int[newCapacity];
 		
+		for (int i = 0; i < newCapacity; ++i) {
+			newArray[i] = -1;
+		}
+
 		// traverse linearly, rehash, insert
 		for (int i = 0; i < capacity; ++i) {
 			j = 0;
 			inserted = false;
 
 			while (!inserted) {
-				int hashedKey = hash(pair.key, j);    // calculate hash
-				if (newArray[hashedKey].key == -1) {  // probe value
+				int hashedKey = hash(key, j);     // calculate hash
+				if (newArray[hashedKey] == -1) {  // probe value
 					newArray[hashedKey] = a[i];
 					inserted = true;
 				} else
@@ -191,9 +203,9 @@ void ProbingHashTable::animatedInsert(KVPair pair) {
 		inserted = false;
 
 		while (!inserted) {
-			int hashedKey = hash(pair.key, j);       // calculate hash
-			if (a[hashedKey].key == -1) {            // probe value
-				a[hashedKey] = pair;
+			int hashedKey = hash(key, j);            // calculate hash
+			if (a[hashedKey] == -1) {            // probe value
+				a[hashedKey] = key;
 				inserted = true;
 			} else
 				++j;
@@ -201,22 +213,22 @@ void ProbingHashTable::animatedInsert(KVPair pair) {
 	}
 
 	system("cls");
-	cout << " Attempting to insert " << pair.key << endl
+	cout << " Attempting to insert " << key << endl
 		<< "------------------------------" << endl << endl;
 	for (int i = 0; i < capacity; ++i) {
-		if (i == hash(pair.key, 0)) {
+		if (i == hash(key, 0)) {
 			// print UPDATED key and dont print empty kv pairs
 			if (j == (capacity + 1) / 2) {
-				cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")   CYCLE START" << endl;
+				cout << "   " << i << ". (" << a[i] << ")   CYCLE START" << endl;
 			}
-			else if (a[i].key == pair.key)
-				cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")   SUCCESS" << endl;
+			else if (a[i] == key)
+				cout << "   " << i << ". (" << a[i] << ")   SUCCESS" << endl;
 			else
-				cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")   FAIL" << endl;
+				cout << "   " << i << ". (" << a[i] << ")   FAIL" << endl;
 		}
 		else
-			if (a[i].key != -1)
-				cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")" << endl;
+			if (a[i] != -1)
+				cout << "   " << i << ". (" << a[i] << ")" << endl;
 			else
 				cout << "   " << i << ". " << endl;
 	}
@@ -228,12 +240,8 @@ void ProbingHashTable::animatedInsert(KVPair pair) {
 
 void ProbingHashTable::print() const {
 	for (int i = 0; i < capacity; ++i)
-		cout << "   " << i << ". (" << a[i].key << ", " << a[i].value << ")" << endl;
+		cout << "   " << i << ". (" << a[i] << ")" << endl;
 
 	cout << endl << endl << "Press any key to continue...";
 	system("pause > nul");
-}
-
-void ProbingHashTable::insertPrint(int index, int key) const {
-	
 }
