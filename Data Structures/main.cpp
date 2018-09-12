@@ -154,11 +154,11 @@ int main() {
 				<< "------------------------" << endl
 				<< "1. Generate hash table from random (key, value) pairs" << endl
 				<< "2. Generate empty hash table" << endl
-				<< "Anything else to exit" << endl << endl;
+				<< "'x' to exit" << endl << endl;
 
 			cin >> inText;
 
-			while (inText == "1" || inText == "2") {
+			while (inText != "x") {
 				if (inText == "1") {
 					system("cls");
 					cout << "Animation" << endl
@@ -222,46 +222,17 @@ int main() {
 					<< "3. Insert a pair" << endl
 					<< "4. Print the table" << endl
 					<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
-					<< "Anything else to exit" << endl << endl;
+					<< "'x' to exit" << endl << endl;
 
 				cin >> inText;
 				cout << endl;
 
-				while (inText == "1" || inText == "2" || inText == "3" || inText == "4" || inText == "5") {
+				while (inText != "x") {
 					if (inText == "1") {
-						/*
-						// search for a key
-						cout << endl << "Enter a key: ";
-						string word;
-						cin >> word;
-
-						int foundInSteps = probingHT.search(stoi((word)));
-
-						if (foundInSteps != -1) {
-							cout << "Found key (" << word << ") in " << foundInSteps << " steps" << endl << endl;
-						}
-						else {
-							cout << "Key not found. " << endl << endl;
-						}
-						*/
+						
 					} else if (inText == "2") {
-						/*
-						// delete a key
-						cout << endl << "Enter a key: ";
-						string word;
-						cin >> word;
-
-						bool deleted = probingHT.deleteKey(stoi(word));
-
-						if (deleted)
-							cout << "Deleted key " << word << ".";
-						else
-							"Key not found.";
-
-						cout << endl << endl;
-						*/
-					} else if (inText == "3") {
-						// insert a (key, value) pair
+						
+					} else if (inText == "3") { // insert a (key, value) pair
 						
 						string key;
 						string value;
@@ -271,8 +242,11 @@ int main() {
 						//cout << "Enter a value: ";
 						//cin >> value;
 
-						probingHT.insert(KVPair(stoi(key), 0), 1);
-						cout << "Inserted (" + key + ", " + value + ")" << endl;
+						if (animationsOn)
+							probingHT.animatedInsert(KVPair(stoi(key), 0));
+						else
+							probingHT.insert(KVPair(stoi(key), 0));
+
 						inText = "1";
 					} else if (inText == "4") {
 						probingHT.print();
@@ -280,7 +254,6 @@ int main() {
 						animationsOn = !animationsOn;
 					}
 
-					system("pause > nul");
 					system("cls");
 					cout << "Hash Table With Probing" << endl
 						<< "------------------------" << endl
@@ -289,7 +262,7 @@ int main() {
 						<< "3. Insert a pair" << endl
 						<< "4. Print the table" << endl
 						<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
-						<< "Anything else to exit" << endl << endl;
+						<< "'x' to exit" << endl << endl;
 
 					cin >> inText;
 					cout << endl;
