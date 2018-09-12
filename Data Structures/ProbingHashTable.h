@@ -17,23 +17,32 @@ public:
 
 	~ProbingHashTable() { }
 private:
-	int* a;
+	int* HT;
 	int probingMethod;
 	int capacity;
 	int numOfElements;
 
+	int prevPrime(int num) const;
 	int nextPrime(int num) const;
 
 	int hash(int key, int j) {
-		int scrambler = (2 * key) + 5;
+		int k = key;
 
 		if (probingMethod == 1)
-			return (scrambler + j) % capacity;
+			return (k + j) % capacity;
 		else if (probingMethod == 2) 
-			return (scrambler + (j * j)) % capacity;
-		else 
-			return 0;
+			return (k + (j * j)) % capacity;
+		else if (probingMethod == 3) {
+			int q = prevPrime(capacity);
+			return (k + j * secondHash(k, q)) % capacity;
+		} else {
+			exit(0);
+		}
 
+	}
+
+	int secondHash(int k, int q) {
+		return 7 - (k % 7);
 	}
 };
 

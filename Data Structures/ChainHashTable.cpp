@@ -3,23 +3,23 @@
 
 ChainHashTable::ChainHashTable() {
 	capacity = 0;
-	a = nullptr;
+	HT = nullptr;
 }
 
 ChainHashTable::ChainHashTable(int numSlots) {
 	// create our array
 	capacity = numSlots;
-	a = new ChainNode[capacity];
+	HT = new ChainNode[capacity];
 }
 
 ChainHashTable::ChainHashTable(const int *keyArray, int keyArraySize, int numSlots, bool limitPrinting) {
 	// create our array
 	capacity = numSlots;
-	a = new ChainNode[capacity];
+	HT = new ChainNode[capacity];
 
 	// initialize array with -1 to indicate no elements stored
 	for (int i = 0; i < capacity; ++i) {
-		a[i] = ChainNode();
+		HT[i] = ChainNode();
 	}
 
 	// insert keys from array
@@ -30,8 +30,8 @@ ChainHashTable::ChainHashTable(const int *keyArray, int keyArraySize, int numSlo
 
 bool ChainHashTable::deleteKey(int key) {
 	int hashedKey = hash(key);
-	ChainNode *trail = &a[hashedKey];
-	ChainNode *node = &a[hashedKey];
+	ChainNode *trail = &HT[hashedKey];
+	ChainNode *node = &HT[hashedKey];
 
 	// if first element
 	if (trail->getKey() == key) {
@@ -74,7 +74,7 @@ bool ChainHashTable::deleteKey(int key) {
 int ChainHashTable::search(int key) const {
 	int hashedKey = hash(key);
 	int steps = 1;
-	ChainNode *node = &a[hashedKey];
+	ChainNode *node = &HT[hashedKey];
 
 	while (node != nullptr) {
 		if (node->getKey() == key) {
@@ -93,7 +93,7 @@ void ChainHashTable::insert(int newKey) {
 	int hashedKey = hash(key);
 
 	// check if the index has no current key stored
-	ChainNode *node = &a[hashedKey];
+	ChainNode *node = &HT[hashedKey];
 
 	if (node->getKey() == -1) {
 		node->setKey(newKey);
@@ -116,7 +116,7 @@ void ChainHashTable::print() const {
 		<< "------------------------" << endl << endl;
 
 	for (int i = 0; i < capacity; ++i) {
-		ChainNode *node = &a[i];
+		ChainNode *node = &HT[i];
 
 		// format the index
 		int capacityDigits = 0;

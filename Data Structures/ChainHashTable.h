@@ -21,7 +21,7 @@ public:
 
 	~ChainHashTable() { };
 private:
-	ChainNode *a;
+	ChainNode *HT;
 	int capacity;
 
 	int hash(int key) const {

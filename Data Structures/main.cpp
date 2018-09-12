@@ -1,6 +1,5 @@
 #include "ChainHashTable.h"
 #include "ProbingHashTable.h"
-#include "KVPair.h"
 #include "RandomGenerator.h"
 
 using namespace std;
@@ -21,20 +20,20 @@ int main() {
 	const int NUM_SLOTS = 5;
 
 	// print settings
-	// limit (key, value) pair printing to 100, and anything else to 50 lines
+	// limited printing for large structures
 	const bool SAFE_PRINTING = false;
-	// print out any randomly generated (key, value) pairs
+	// print out any generated keys
 	const bool PRINT_GENERATION = true;
 
-	// generate our randomized input data, store in kvPairArray
+	// generate our randomized input data, store in key array
 	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB, VALUE_RANGE_LB, VALUE_RANGE_UB);
 	int *keyArray = keyGen.keyArray;
 
 	if (PRINT_GENERATION) {
 		cout << "Shuffled keys" << endl
-			<< "-------------------------------------" << endl;
+			<< "-------------" << endl;
 		for (int i = 0; i < NUM_KEYS; ++i) {
-			cout << "   - (" << keyArray[i] << ")" << endl;
+			cout << "  " << i << ". (" << keyArray[i] << ")" << endl;
 		}
 		cout << endl << endl;
 	}
@@ -56,7 +55,7 @@ int main() {
 
 			cout << "Hash Table With Chaining" << endl
 				<< "------------------------" << endl
-				<< "1. Generate hash table from random (key, value) pairs" << endl
+				<< "1. Generate hash table from keys in (" << KEY_RANGE_UB << ", " << KEY_RANGE_UB << ")" << endl
 				<< "2. Generate empty hash table" << endl
 				<< "Anything else to exit" << endl << endl;
 
@@ -64,7 +63,7 @@ int main() {
 
 			while (inText == "1" || inText == "2") {
 				if (inText == "1") {
-					// create hash table with chaining from kvPairArray
+					// create hash table with chaining from keyArray
 					chainHT = ChainHashTable(keyArray, NUM_KEYS, NUM_SLOTS, SAFE_PRINTING);
 				} else if (inText == "2") {
 					// create empty hash table
@@ -78,7 +77,7 @@ int main() {
 					<< "------------------------" << endl
 					<< "1. Search for a key" << endl
 					<< "2. Delete a key" << endl
-					<< "3. Insert a pair" << endl
+					<< "3. Insert a key" << endl
 					<< "4. Print the table" << endl
 					<< "Anything else to exit" << endl << endl;
 
@@ -114,10 +113,9 @@ int main() {
 
 						cout << endl << endl;
 					} else if (inText == "3") {
-						// insert a (key, value) pair
+						// insert a key
 
 						string key;
-						string value;
 						
 						cout << endl << "Enter a key: ";
 						cin >> key;
@@ -149,7 +147,7 @@ int main() {
 			system("cls");
 			cout << "Hash Table With Probing" << endl
 				<< "------------------------" << endl
-				<< "1. Generate hash table from random (key, value) pairs" << endl
+				<< "1. Generate hash table from keys in (" << KEY_RANGE_UB << ", " << KEY_RANGE_UB << ")" << endl
 				<< "2. Generate empty hash table" << endl
 				<< "'x' to exit" << endl << endl;
 
@@ -185,7 +183,7 @@ int main() {
 					else if (inText == "3")
 						probingMethod = 3;
 
-					// create hash table with probing from kvPairArray
+					// create hash table with probing from keyArray
 					probingHT = ProbingHashTable(1, keyArray, NUM_KEYS, animatedCreate);
 				} else if (inText == "2") {
 					// create empty hash table
@@ -254,7 +252,7 @@ int main() {
 						<< "------------------------" << endl
 						<< "1. Search for a key" << endl
 						<< "2. Delete a key" << endl
-						<< "3. Insert a pair" << endl
+						<< "3. Insert a key" << endl
 						<< "4. Print the table" << endl
 						<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
 						<< "'x' to exit" << endl << endl;
