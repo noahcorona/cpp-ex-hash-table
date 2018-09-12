@@ -7,8 +7,9 @@ ChainHashTable::ChainHashTable() {
 }
 
 ChainHashTable::ChainHashTable(int numSlots) {
+	// create our array
 	capacity = numSlots;
-	a = nullptr;
+	a = new ChainNode[capacity];
 }
 
 ChainHashTable::ChainHashTable(const KVPair *kvPairArray, int kvPairSize, int numSlots, bool limitPrinting) {

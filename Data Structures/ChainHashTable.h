@@ -25,7 +25,7 @@ private:
 	int capacity;
 
 	int hash(int key) const {
-		return key % capacity;
+		return ((2 * key) + 7) % capacity;
 	}
 };
 

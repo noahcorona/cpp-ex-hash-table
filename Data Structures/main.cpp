@@ -6,39 +6,37 @@
 using namespace std;
 
 int main() {
-	// number of holes
-	const int NUM_SLOTS = 5;
-
-	// number of pigeons
-	const int NUM_KEYS = 100;
-
-	// initialize the range of the random keys
+	// initialize the range of the keys
 	const int KEY_RANGE_LB = 0;
 	const int KEY_RANGE_UB = 100;
 
-	// initialize the range of the random values
+	// initialize the range of the random values (no affect on anything)
 	const int VALUE_RANGE_LB = 0;
 	const int VALUE_RANGE_UB = 10;
+
+	// number of pigeons
+	const int NUM_KEYS = KEY_RANGE_UB - KEY_RANGE_LB;
+
+	// number of holes (for chaining, num keys != num slots)
+	const int NUM_SLOTS = 5;
 
 	// print settings
 	// limit (key, value) pair printing to 100, and anything else to 50 lines
 	const bool SAFE_PRINTING = false;
 	// print out any randomly generated (key, value) pairs
-	const bool PRINT_RANDOM_GEN = false;
+	const bool PRINT_GENERATION = false;
 
 	// generate our randomized input data, store in kvPairArray
-	RandomGenerator rng = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB, VALUE_RANGE_LB, VALUE_RANGE_UB);
-	KVPair kvPairArray[NUM_KEYS];
-	if (PRINT_RANDOM_GEN) 
+	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB, VALUE_RANGE_LB, VALUE_RANGE_UB);
+	KVPair *kvPairArray = keyGen.keyValueArray;
+
+	if (PRINT_GENERATION) 
 		cout << "Randomly generated (key, value) pairs" << endl
 			<< "-------------------------------------" << endl;
 	for (int i = 0; i < NUM_KEYS; ++i) {
-		int key = rng.getKey();
-		int value = rng.getValue();
-		kvPairArray[i] = KVPair(key, value);
-		if (PRINT_RANDOM_GEN) cout << "   - (" << key << ", " << value << ")" << endl;
+		if (PRINT_GENERATION) cout << "   - (" << kvPairArray[i].key << ", " << kvPairArray[i].value << ")" << endl;
 	}
-	if (PRINT_RANDOM_GEN)  cout << endl << endl;
+	if (PRINT_GENERATION)  cout << endl << endl;
 
 
 	cout << "Data Structures" << endl 
@@ -49,6 +47,7 @@ int main() {
 
 	string inText;
 	cin >> inText;
+
 	while (inText == "1" || inText == "2") {
 		if (inText == "1") {
 			// hash table with chaining
@@ -121,10 +120,11 @@ int main() {
 						
 						cout << endl << "Enter a key: ";
 						cin >> key;
-						cout << "Enter a value: ";
-						cin >> value;
+						//cout << "Enter a value: ";
+						//cin >> value;
 
-						chainHT.insert(KVPair(stoi(key), stoi(value)));
+						chainHT.insert(KVPair(stoi(key), 0));
+						//chainHT.insert(KVPair(stoi(key), stoi(value)));
 						cout << "Inserted (" + key + ", " + value + ")" << endl;
 					} else if (inText == "4") {
 						chainHT.print();
@@ -158,22 +158,19 @@ int main() {
 			cin >> inText;
 
 			while (inText == "1" || inText == "2") {
-				system("cls");
-				cout << "Animation"  << endl
-					<< "---------" << endl
-					<< "1. Enabled" << endl
-					<< "2. Disabled" << endl << endl;
-				cin >> inText;
-				
-				bool animatedCreate = true;
-				if (inText == "2")
-					animatedCreate = false;
-				system("cls");
-
 				if (inText == "1") {
-					// create hash table with probing from kvPairArray
-					probingHT = ProbingHashTable(1, kvPairArray, NUM_KEYS, animatedCreate);
-				} else if (inText == "2") {
+					system("cls");
+					cout << "Animation" << endl
+						<< "---------" << endl
+						<< "1. Enabled" << endl
+						<< "2. Disabled" << endl << endl;
+					cin >> inText;
+
+					bool animatedCreate = true;
+					if (inText == "2")
+						animatedCreate = false;
+					system("cls");
+
 					// create empty hash table
 					cout << "Enter probing method: " << endl
 						<< "1. Linear" << endl
@@ -185,18 +182,37 @@ int main() {
 					int probingMethod;
 					if (inText == "1")
 						probingMethod = 1;
-					else if(inText == "2") 
+					else if (inText == "2")
 						probingMethod = 2;
 					else if (inText == "3")
 						probingMethod = 3;
 
+					// create hash table with probing from kvPairArray
+					probingHT = ProbingHashTable(1, kvPairArray, NUM_KEYS, animatedCreate);
+				} else if (inText == "2") {
+					// create empty hash table
+					system("cls");
+					cout << "Enter probing method: " << endl
+						<< "1. Linear" << endl
+						<< "2. Quadratic" << endl
+						<< "3. Double hashing" << endl << endl;
+					cin >> inText;
+
+					int probingMethod;
+					if (inText == "1")
+						probingMethod = 1;
+					else if (inText == "2")
+						probingMethod = 2;
+					else if (inText == "3")
+						probingMethod = 3;
+					
+					system("cls");
 					cout << "Enter size: ";
 					cin >> inText;
 					cout << endl << endl;
 					probingHT = ProbingHashTable(probingMethod, stoi(inText));
 				}
 
-				system("pause > nul");
 				system("cls");
 				cout << "Hash Table With Probing" << endl
 					<< "------------------------" << endl
@@ -204,7 +220,7 @@ int main() {
 					<< "2. Delete a key" << endl
 					<< "3. Insert a pair" << endl
 					<< "4. Print the table" << endl
-					<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << endl
+					<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
 					<< "Anything else to exit" << endl << endl;
 
 				cin >> inText;
@@ -245,18 +261,18 @@ int main() {
 						*/
 					} else if (inText == "3") {
 						// insert a (key, value) pair
-						/*
+						
 						string key;
 						string value;
 
 						cout << endl << "Enter a key: ";
 						cin >> key;
-						cout << "Enter a value: ";
-						cin >> value;
+						//cout << "Enter a value: ";
+						//cin >> value;
 
-						probingHT.insert(KVPair(stoi(key), stoi(value)), 1);
+						probingHT.insert(KVPair(stoi(key), 0), 1);
 						cout << "Inserted (" + key + ", " + value + ")" << endl;
-						*/
+						inText = "1";
 					} else if (inText == "4") {
 						probingHT.print();
 					} else if (inText == "5") {
@@ -271,7 +287,7 @@ int main() {
 						<< "2. Delete a key" << endl
 						<< "3. Insert a pair" << endl
 						<< "4. Print the table" << endl
-						<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << endl
+						<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
 						<< "Anything else to exit" << endl << endl;
 
 					cin >> inText;
