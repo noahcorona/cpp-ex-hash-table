@@ -30,13 +30,14 @@ int main() {
 	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB, VALUE_RANGE_LB, VALUE_RANGE_UB);
 	KVPair *kvPairArray = keyGen.keyValueArray;
 
-	if (PRINT_GENERATION) 
+	if (PRINT_GENERATION) {
 		cout << "Randomly generated (key, value) pairs" << endl
 			<< "-------------------------------------" << endl;
-	for (int i = 0; i < NUM_KEYS; ++i) {
-		if (PRINT_GENERATION) cout << "   - (" << kvPairArray[i].key << ", " << kvPairArray[i].value << ")" << endl;
+		for (int i = 0; i < NUM_KEYS; ++i) {
+			cout << "   - (" << kvPairArray[i].key << ", " << kvPairArray[i].value << ")" << endl;
+		}
+		cout << endl << endl;
 	}
-	if (PRINT_GENERATION)  cout << endl << endl;
 
 
 	cout << "Data Structures" << endl 
