@@ -4,27 +4,45 @@
 using namespace std;
 
 class ProbingHashTable {
+	friend ostream& operator<<(ostream& out, const ProbingHashTable& printHT);
 public:
-	ProbingHashTable();
-	ProbingHashTable(int newProbingMethod, int newCapacity);
-	ProbingHashTable(int newProbingMethod, int *keyArray, int numKeys, bool limitPrinting);
+	// "stanard" functions
+	ProbingHashTable();                                            // default constructor
+	ProbingHashTable(const ProbingHashTable& otherHT);             // copy constructor
+	//ProbingHashTable(const ProbingHashTable&& otherHT);            // move constructor
 
-	void print() const;
-	void animatedInsert(int newKey);
-	void insert(int newKey);
-	int search(int key);
+	void setHT(int *newHT) { HT = newHT; }                         // mutators
+	void setCapacity(int newCapacity) { capacity = newCapacity; }
+	int* getHT() const { return HT; }                              // accessors
+	int getCapacity() const { return capacity; }
+
+	void insertKey(int newKey);
+	int searchKey(int key);
 	bool deleteKey(int key);
+	void rehash();
+	void resetTable();
+	bool isEmpty() const;
 
-	~ProbingHashTable() { }
+	int prevPrime(int num) const;
+	int nextPrime(int num) const;
+
+	//ProbingHashTable& operator=(const ProbingHashTable& otherHT);  // copy assignment
+	//ProbingHashTable& operator=(const ProbingHashTable&& otherHT); // move assignment
+
+	~ProbingHashTable() { }                                        // destructor
+
+	// extra functions for gui
+	ProbingHashTable(int newCapacity);
+	ProbingHashTable(int *keyArray, int numKeys);
+	ProbingHashTable(int newProbingMethod, int newCapacity);
+	ProbingHashTable(int newProbingMethod, int *keyArray, int numKeys);
+	ProbingHashTable(int newProbingMethod, int *keyArray, int numKeys, bool animationsOn);
+	void insertKeyAnimated(int newKey);
 private:
 	int* HT;
 	int probingMethod;
 	int capacity;
-	int functionalCapacity;
 	int numOfElements;
-
-	int prevPrime(int num) const;
-	int nextPrime(int num) const;
 
 	int hash(int key, int j) {
 		int k = key;
@@ -42,9 +60,11 @@ private:
 
 	}
 
-	int secondHash(int k, int q) {
-		return 7 - (k % 7);
+	int secondHash(int k, int q) {                                 // double hash function
+		return q - (k % q);
 	}
+
+	int searchKey(int key) const;                                  // returns index
 };
 
 #endif

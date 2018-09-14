@@ -38,11 +38,11 @@ public:
 
 		// create key only array
 		keyArray = new int[size];
-		for (int i = 0; i < size; ++i) {
+		for (int i = 0; i < size; ++i)
 			keyArray[i] = i;
-		}
 
-		shuffleOneRandom(keyArray);
+		for (int i = 0; i < size; ++i)
+			shuffleOneRandom(keyArray);
 
 	}
 
@@ -85,7 +85,7 @@ private:
 		// initialize RNG (using Mersenne Twister)
 		generator = mt19937();
 		generator.seed(random_device()());
-		keyRandom = uniform_int_distribution<mt19937::result_type>(keyRangeLB, keyRangeUB);
+		keyRandom = uniform_int_distribution<mt19937::result_type>(keyRangeLB, keyRangeUB - 1);
 		valueRandom = uniform_int_distribution<mt19937::result_type>(valueRangeLB, valueRangeUB);
 		return keyRandom(generator);
 	}

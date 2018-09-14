@@ -223,11 +223,11 @@ int main() {
 				cout << endl;
 
 				while (inText != "x") {
-					if (inText == "1") {        // search for a key (to do)
+					if (inText == "1") {                        // search for a key (to do)
 						
-					} else if (inText == "2") { // delete a key (to do)
+					} else if (inText == "2") {                 // delete a key (to do)
 						
-					} else if (inText == "3") { // insert a key
+					} else if (inText == "3") {                 // insert a key
 						
 						string key;
 						string value;
@@ -236,14 +236,16 @@ int main() {
 						cin >> key;
 
 						if (animationsOn)
-							probingHT.animatedInsert(stoi(key));
+							probingHT.insertKeyAnimated(stoi(key));
 						else
-							probingHT.insert(stoi(key));
+							probingHT.insertKey(stoi(key));
 
 						inText = "1";
-					} else if (inText == "4") { // print the hash table
-						probingHT.print();
-					} else if (inText == "5") { // toggle animations
+					} else if (inText == "4") {                  // print the hash table
+						cout << probingHT << endl << endl
+							<< "Press any key to continue...";
+						system("pause > nul");
+					} else if (inText == "5") {                  // toggle animations
 						animationsOn = !animationsOn;
 					}
 
