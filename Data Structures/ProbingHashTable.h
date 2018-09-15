@@ -8,16 +8,20 @@ class ProbingHashTable {
 public:
 	// "standard" functions
 	ProbingHashTable();                                            // default constructor
+	ProbingHashTable(int newCapacity);
 	//ProbingHashTable(const ProbingHashTable& otherHT);             // copy constructor
 	//ProbingHashTable(const ProbingHashTable&& otherHT);            // move constructor
 
 	void setHT(int *newHT) { HT = newHT; }                         // mutators
 	void setCapacity(int newCapacity) { capacity = newCapacity; }
+	void setProbingMethod(int newProbingMethod) { probingMethod = newProbingMethod; }
 	int* getHT() const { return HT; }                              // accessors
 	int getCapacity() const { return capacity; }
+	int getProbingMethod() const { return probingMethod; }
 
-	int insertKey(int key);                                        // returns number of steps taken
-	int searchKey(int key) const ;
+	void insertKey(int key);                                        // returns number of steps taken
+	bool searchKey(int key) const ;
+	void timedSearch(int *keyArray, int numKeys) const;
 	bool deleteKey(int key);
 	void rehash();
 	void resetTable();
@@ -30,14 +34,6 @@ public:
 //	ProbingHashTable& operator=(const ProbingHashTable&& otherHT); // move assignment
 
 	~ProbingHashTable() { }                                        // destructor
-
-	// extra functions for gui
-	ProbingHashTable(int newCapacity);
-	ProbingHashTable(int *keyArray, int numKeys);
-	ProbingHashTable(int newProbingMethod, int newCapacity);
-	ProbingHashTable(int newProbingMethod, int *keyArray, int numKeys);
-	ProbingHashTable(int newProbingMethod, int *keyArray, int numKeys, bool animationsOn);
-	int insertKeyAnimated(int newKey);
 private:
 	int* HT;
 	int probingMethod;

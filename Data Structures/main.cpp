@@ -1,304 +1,97 @@
-#include "ChainHashTable.h"
+#include <iostream>
+#include <random>
 #include "ProbingHashTable.h"
-#include "RandomGenerator.h"
+
+#include <chrono>                                                          // for sleep function
+#include <thread>                                                          // for sleep function
 
 using namespace std;
+using namespace std::this_thread;                                          // for sleep function
+using namespace std::chrono_literals;                                      // for sleep function
+using std::chrono::system_clock;                                           // for sleep function
+
+
+const long int NUM_KEYS = 10000;                                           // number of keys used to compare efficiency
+                                                                           // of collision resolution methods
+
+void wait() { 
+	sleep_for(250ms); 
+}
+
+void waitForKeyInput() {
+	cout << endl << endl << "Press any key to continue...";
+	system("pause > nul");
+	system("cls");
+}
 
 int main() {
-	// initialize the range of the keys
-	const int KEY_RANGE_LB = 50000;
-	const int KEY_RANGE_UB = 150000;
+	cout << "1. Comparing collision resolution methods" << endl;           // 1. compare probing methods
 
-	// number of pigeons (+ 1 is for the inclusive upper bound)
-	const int NUM_KEYS = KEY_RANGE_UB - KEY_RANGE_LB;
+	std::random_device random;
+	std::mt19937 rng(random());
+	std::uniform_int_distribution<> distr(0, NUM_KEYS - 1);
 
-	// number of holes (for chaining, num keys != num slots)
-	const int NUM_SLOTS = 5;
+	int *keys = new int[NUM_KEYS];
 
-	// print settings
-	// limited printing for large structures
-	const bool SAFE_PRINTING = false;
-	// print out any generated keys
-	const bool PRINT_GENERATION = false;
+	for (int i = 0; i < NUM_KEYS; ++i)                                     // generate keys
+		keys[i] = i % NUM_KEYS;
 
-	int probingMethod;
-
-	// generate our randomized input data, store in key array
-	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB);
-	int *keyArray = keyGen.keyArray;
-	int keyArraySize = KEY_RANGE_UB - KEY_RANGE_LB;
-
-	if (PRINT_GENERATION) {
-		cout << "Shuffled keys" << endl
-			<< "-------------" << endl;
-		for (int i = 0; i < NUM_KEYS; ++i) {
-			cout << "  " << i << ". (" << keyArray[i] << ")" << endl;
-		}
-		cout << endl << endl;
+	for (int i = 0; i < NUM_KEYS; ++i) {                                   // shuffle keys
+		int first = distr(rng);
+		int second = distr(rng);
+		int temp = keys[first];
+		keys[second] = keys[first];
+		keys[first] = temp;
 	}
 
-	cout << "Data Structures" << endl 
-		<< "---------------" << endl
-		<< "1. Hash table with chaining" << endl 
-		<< "2. Hash table with probing" << endl
-		<< "Anything else to exit" << endl << endl;
+	for (int i = 1; i <= 3; ++i) {
+		ProbingHashTable probingHT = ProbingHashTable(i);
 
-	string inText;
-	cin >> inText;
+		cout << endl << "----------------------------------------------" << endl;
+		if (i == 1) cout << "                Linear probing";
+		else if (i == 2) cout << "               Quadratic probing";
+		else if (i == 3) cout << "                Double hashing";
+		cout << endl << "----------------------------------------------" << endl;
+		cout << endl << "Initial size: " << probingHT.getCapacity() << endl;
 
-	while (inText == "1" || inText == "2") {
-		if (inText == "1") {
-			// hash table with chaining
-			ChainHashTable chainHT;
+		for (int j = 0; j < NUM_KEYS; ++j)
+			probingHT.insertKey(keys[j]);                                  // 2. test insertKey
 
-			cout << "Hash Table With Chaining" << endl
-				<< "------------------------" << endl
-				<< "1. Generate hash table from keys in [" << KEY_RANGE_LB << ", " << KEY_RANGE_UB << "]" << endl
-				<< "2. Generate empty hash table" << endl
-				<< "Anything else to exit" << endl << endl;
+		cout << "Final size:   " << probingHT.getCapacity() << endl;
 
-			cin >> inText;
-
-			while (inText == "1" || inText == "2") {
-				if (inText == "1") {
-					// create hash table with chaining from keyArray
-					chainHT = ChainHashTable(keyArray, NUM_KEYS, NUM_SLOTS, SAFE_PRINTING);
-				} else if (inText == "2") {
-					// create empty hash table
-					cout << "Enter size: ";
-					cin >> inText;
-					cout << endl << endl;
-					chainHT = ChainHashTable(stoi(inText));
-				}
-
-				cout << "Hash Table With Chaining" << endl
-					<< "------------------------" << endl
-					<< "1. Search for a key" << endl
-					<< "2. Delete a key" << endl
-					<< "3. Insert a key" << endl
-					<< "4. Print the table" << endl
-					<< "Anything else to exit" << endl << endl;
-
-				cin >> inText;
-				cout << endl;
-
-				while (inText == "1" || inText == "2" || inText == "3" || inText == "4") {
-					if (inText == "1") {
-						// search for a key
-						cout << endl << "Enter a key: ";
-						string word;
-						cin >> word;
-
-						int foundInSteps = chainHT.search(stoi((word)));
-
-						if (foundInSteps != -1) {
-							cout << "Found key (" << word << ") in " << foundInSteps << " steps" << endl << endl;
-						} else {
-							cout << "Key not found. " << endl << endl;
-						}
-					} else if (inText == "2") {
-						// delete a key
-						cout << endl << "Enter a key: ";
-						string word;
-						cin >> word;
-
-						bool deleted = chainHT.deleteKey(stoi(word));
-
-						if (deleted)
-							cout << "Deleted key " << word << ".";
-						else
-							"Key not found.";
-
-						cout << endl << endl;
-					} else if (inText == "3") {
-						// insert a key
-
-						string key;
-						
-						cout << endl << "Enter a key: ";
-						cin >> key;
-
-						chainHT.insert(stoi(key));
-						cout << "Inserted (" + key + ")" << endl;
-					} else if (inText == "4") {
-						chainHT.print();
-					}
-
-					cout << "Hash Table With Chaining" << endl
-						<< "------------------------" << endl
-						<< "1. Search for a key" << endl
-						<< "2. Delete a key" << endl
-						<< "3. Insert a key" << endl
-						<< "4. Print the table" << endl
-						<< "Anything else to exit" << endl << endl;
-
-					cin >> inText;
-					cout << endl;
-				}
-			}
-		} else if (inText == "2") {
-			ProbingHashTable probingHT;
-			bool animationsOn = true;
-
-			system("cls");
-			cout << "Hash Table With Probing" << endl
-				<< "------------------------" << endl
-				<< "1. Generate hash table from keys in [" << KEY_RANGE_LB << ", " << KEY_RANGE_UB << "]" << endl
-				<< "2. Generate empty hash table" << endl
-				<< "'x' to exit" << endl << endl;
-
-			cin >> inText;
-
-			while (inText != "x") {
-				if (inText == "1") {
-					system("cls");
-					cout << "Animation" << endl
-						<< "---------" << endl
-						<< "1. Enabled" << endl
-						<< "2. Disabled" << endl << endl;
-					cin >> inText;
-
-					bool animatedCreate = true;
-					if (inText == "2")
-						animatedCreate = false;
-					system("cls");
-
-					// create empty hash table
-					cout << "Enter probing method: " << endl
-						<< "1. Linear" << endl
-						<< "2. Quadratic" << endl
-						<< "3. Double hashing" << endl << endl;
-					cin >> inText;
-					cout << endl << endl;
-
-
-					if (inText == "1")
-						probingMethod = 1;
-					else if (inText == "2")
-						probingMethod = 2;
-					else if (inText == "3")
-						probingMethod = 3;
-
-					// create hash table with probing from keyArray
-					system("cls");
-					probingHT = ProbingHashTable(probingMethod, keyArray, NUM_KEYS / 2, animatedCreate);
-					cout << endl << endl << "Press any key to continue...";
-					system("pause > nul");
-					inText = "1";
-				} else if (inText == "2") {
-					// create empty hash table
-					system("cls");
-					cout << "Enter probing method: " << endl
-						<< "1. Linear" << endl
-						<< "2. Quadratic" << endl
-						<< "3. Double hashing" << endl << endl;
-					cin >> inText;
-
-					int probingMethod;
-					if (inText == "1")
-						probingMethod = 1;
-					else if (inText == "2")
-						probingMethod = 2;
-					else if (inText == "3")
-						probingMethod = 3;
-					
-					system("cls");
-					cout << "Enter size: ";
-					cin >> inText;
-					cout << endl << endl;
-					probingHT = ProbingHashTable(probingMethod, stoi(inText));
-				}
-
-				system("cls");
-				cout << "Hash Table With Probing" << endl
-					<< "------------------------" << endl
-					<< "1. Search for a key" << endl
-					<< "2. Delete a key" << endl
-					<< "3. Insert a key" << endl
-					<< "4. Print the table" << endl
-					<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
-					<< "6. Rehash generated keys with new probing method (currently: " << probingMethod << ")" << endl
-					<< "7. Compare efficiencies" << endl
-					<< "'x' to exit" << endl << endl;
-
-				cin >> inText;
-				cout << endl;
-
-				while (inText != "x") {
-					if (inText == "1") {                        // search for a key
-						string key;
-						cout << endl << "Enter a key: ";
-						cin >> key;
-
-						cout << "Found in " << probingHT.searchKey(stoi(key))
-							<< " steps" << endl;
-						system("pause > nul");
-					} else if (inText == "2") {                 // delete a key (to do)
-						
-					} else if (inText == "3") {                 // insert a key
-						
-						string key;
-						cout << endl << "Enter a key: ";
-						cin >> key;
-
-						if (animationsOn)
-							probingHT.insertKeyAnimated(stoi(key));
-						else
-							probingHT.insertKey(stoi(key));
-
-						inText = "1";
-					} else if (inText == "4") {                  // print the hash table
-						cout << probingHT << endl << endl
-							<< "Press any key to continue...";
-						system("pause > nul");
-					} else if (inText == "5") {                  // toggle animations
-						animationsOn = !animationsOn;
-					} else if (inText == "6") {
-						system("cls");
-						cout << "Enter probing method: " << endl
-							<< "1. Linear" << endl
-							<< "2. Quadratic" << endl
-							<< "3. Double hashing" << endl << endl;
-						cin >> inText;
-
-						int probingMethod;
-						if (inText == "1")
-							probingMethod = 1;
-						else if (inText == "2")
-							probingMethod = 2;
-						else if (inText == "3")
-							probingMethod = 3;
-
-						probingHT.resetTable();
-						system("cls");
-						probingHT = ProbingHashTable(probingMethod, keyArray, NUM_KEYS / 2, false);
-					} else if (inText == "7") {
-						system("cls");
-						for (int i = 1; i <= 3; ++i) {
-							ProbingHashTable newHT = ProbingHashTable(i, keyArray, NUM_KEYS / 2, false);
-						}
-						cout << endl << endl << "Press any key to continue...";
-						system("pause > nul");
-					}
-
-					system("cls");
-					cout << "Hash Table With Probing" << endl
-						<< "------------------------" << endl
-						<< "1. Search for a key" << endl
-						<< "2. Delete a key" << endl
-						<< "3. Insert a key" << endl
-						<< "4. Print the table" << endl
-						<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
-						<< "6. Rehash generated keys with new probing method (currently: " << probingMethod << ")" << endl
-						<< "7. Compare efficiencies" << endl
-						<< "'x' to exit" << endl << endl;
-
-					cin >> inText;
-					cout << endl;
-				}
-			}
-		}
+		probingHT.timedSearch(keys, NUM_KEYS);                             // 3. test searchKey
 	}
 
+	waitForKeyInput();
+
+	ProbingHashTable probingHT;                                            // 4. test default constructor
+
+	cout << "2. Inserting prime numbers up to 100 with ";
+	if (probingHT.getProbingMethod() == 1)
+		cout << "linear probing" << endl;
+	else if (probingHT.getProbingMethod() == 2)
+		cout << "quadratic probing" << endl;
+	else if (probingHT.getProbingMethod() == 3)
+		cout << "double hashing" << endl;
+	int i = 1;
+	while (i < 100) {
+		system("cls");
+		cout << "3. Testing insertKey with prime numbers up to 100 with ";
+		if (probingHT.getProbingMethod() == 1)
+			cout << "linear probing" << endl;
+		else if (probingHT.getProbingMethod() == 2)
+			cout << "quadratic probing" << endl;
+		else if (probingHT.getProbingMethod() == 3)
+			cout << "double hashing" << endl;
+
+		probingHT.insertKey(i);
+		cout << probingHT << endl;                                         // 5. test insertion operator
+		i = probingHT.nextPrime(i);
+		wait();
+	}
+
+
+	delete[] keys;
+	system("pause > nul");
 	return 0;
 }
