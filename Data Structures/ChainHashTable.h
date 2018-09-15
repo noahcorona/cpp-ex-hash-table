@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include "ChainNode.h"
-#include "KVPair.h"
 
 using namespace std;
 

@@ -13,10 +13,10 @@ public:
 	//ProbingHashTable(const ProbingHashTable&& otherHT);            // move constructor
 
 	void setHT(int *newHT) { HT = newHT; }                         // mutators
-	void setCapacity(int newCapacity) { capacity = newCapacity; }
+	void setCapacity(int newCapacity) { size = newCapacity; }
 	void setProbingMethod(int newProbingMethod) { probingMethod = newProbingMethod; }
 	int* getHT() const { return HT; }                              // accessors
-	int getCapacity() const { return capacity; }
+	int getCapacity() const { return size; }
 	int getProbingMethod() const { return probingMethod; }
 
 	void insertKey(int key);                                        // returns number of steps taken
@@ -37,19 +37,19 @@ public:
 private:
 	int* HT;
 	int probingMethod;
-	int capacity;
+	int size;
 	int numItems;
 
 	int hash(int key, int j) const {
 		int k = key;
 
 		if (probingMethod == 1)
-			return (k + j) % capacity;
+			return (k + j) % size;
 		else if (probingMethod == 2) 
-			return (k + (j * j)) % capacity;
+			return (k + (j * j)) % size;
 		else if (probingMethod == 3) {
-			int q = prevPrime(capacity);
-			return (k + j * secondHash(k, q)) % capacity;
+			int q = prevPrime(size);
+			return (k + j * secondHash(k, q)) % size;
 		} else {
 			exit(0);
 		}
@@ -60,9 +60,7 @@ private:
 		return q - (k % q);
 	}
 
-	//int searchKey(int key) const {
-	//	return hash(key, 0);
-	//} // returns index
+	int searchKeyIndex(int key) const;
 };
 
 #endif

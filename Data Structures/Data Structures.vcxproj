@@ -122,9 +122,7 @@
   <ItemGroup>
     <ClInclude Include="ChainHashTable.h" />
     <ClInclude Include="ChainNode.h" />
-    <ClInclude Include="KVPair.h" />
     <ClInclude Include="ProbingHashTable.h" />
-    <ClInclude Include="RandomGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

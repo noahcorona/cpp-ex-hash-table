@@ -1,6 +1,5 @@
 #ifndef CHAININGNODE
 #define CHAININGNODE
-#include "KVPair.h"
 
 class ChainNode {
 

@@ -10,7 +10,7 @@ using namespace std::this_thread;                                  // for delay
 using namespace std::chrono_literals;                              // for delay
 using std::chrono::system_clock;                                   // for delay
 
-const int DEFAULT_PROBING_METHOD = 1;                              // 1. linear 2. quadratic 3. double hashing
+const int DEFAULT_PROBING_METHOD = 2;                              // 1. linear 2. quadratic 3. double hashing
 const int DEFAULT_INITIAL_CAPACITY = 23;                           // default constructor size
 
 ostream& operator<<(ostream& out, const ProbingHashTable& printHT) {
@@ -18,7 +18,7 @@ ostream& operator<<(ostream& out, const ProbingHashTable& printHT) {
 	int capacity = printHT.getCapacity();
 
 	for (int i = 0; i < capacity; ++i)
-		if (HT[i] != -1)
+		if (HT[i] >= 0)
 			cout << "   " << i << ". (" << HT[i] << ")" << endl;
 		else
 			cout << "   " << i << "." << endl;
@@ -28,152 +28,160 @@ ostream& operator<<(ostream& out, const ProbingHashTable& printHT) {
 
 ProbingHashTable::ProbingHashTable() {
 	probingMethod = DEFAULT_PROBING_METHOD;
-	capacity = DEFAULT_INITIAL_CAPACITY;
+	size = DEFAULT_INITIAL_CAPACITY;
 	numItems = 0;
-	HT = new int[capacity];
+	HT = new int[size];
 
-	for (int i = 0; i < capacity; ++i)
+	for (int i = 0; i < size; ++i)
 		HT[i] = -1;
 }
 
 ProbingHashTable::ProbingHashTable(int newProbingMethod) {
 	probingMethod = newProbingMethod;
-	capacity = DEFAULT_INITIAL_CAPACITY;
+	size = DEFAULT_INITIAL_CAPACITY;
 	numItems = 0;
-	HT = new int[capacity];
+	HT = new int[size];
 
-	for (int i = 0; i < capacity; ++i)
+	for (int i = 0; i < size; ++i)
 		HT[i] = -1;
 }
 
-void ProbingHashTable::insertKey(int key) {
-	bool inserted = false;
+void ProbingHashTable::insertKey(int key) {                        // function insertKey
+	bool foundOpen = false;
 	bool cycled = false;
 	int j = 0;
+	int hashedKey;
 
-	int hashedKey = hash(key, j);
+	while (!foundOpen && !cycled) {                                //  - while no open spots and no cycle
+		hashedKey = hash(key, j);                                  //    - compute hash
 
-	while (!inserted && !cycled) {
-		int hashedKey = hash(key, j);
-		if (j > capacity)
+		if (j > size)                                              //    - check if cycled depending on probing method
 			cycled = true;
-		else if (probingMethod == 2 && j >= (capacity + 1) / 2)         // quadratic
+		else if (probingMethod == 2 && j >= (size + 1) / 2)
 			cycled = true;
 
-			if (HT[hashedKey] < 0) {
-				HT[hashedKey] = key;
-				inserted = true;
-			} else
-				++j;
+		if (HT[hashedKey] < 0)                                     //    - if empty or deleted
+			foundOpen = true;                                      //      - insert
+		else                                                       //    - else
+			++j;                                                   //      - increment j
 	}
 
-	if (cycled) {
-		rehash();
-		j = 0;
-
-		while (!inserted && j <= capacity) {
-			int hashedKey = hash(key, j);
-
-			if (HT[hashedKey] < 0) {
-				HT[hashedKey] = key;
-				inserted = true;
-			} else 
-				++j;
-		}
-
-		if (j == capacity)
-			cerr << "Not good" << endl;
+	if (foundOpen) {                                               //  - if found open spot
+		HT[hashedKey] = key;                                       //    - insert
+		++numItems;
+	} else {                                                       //  - else
+		rehash();                                                  //    - rehash
+		insertKey(key);                                            //    - call insertKey recursively
 	}
-
-	++numItems;
 }
 
-bool ProbingHashTable::searchKey(int key) const {
-	bool found = false;
+bool ProbingHashTable::searchKey(int key) const {                  // function searchKey
+	bool found = false;                                                 
 	bool done = false;
 	int j = 0;
 
-	while (!found && !done) {
+	while (!found && !done) {                                      // - while not found and not cycled
 		int hashedKey = hash(key, j);
 
-		if (HT[hashedKey] == key) {
-			found = true;
+		if (HT[hashedKey] == key) {                                //   - if found our key
+			found = true;                                          //     - found = true
 			done = true;
-		} else if (HT[hashedKey] == -1)
+		} else if (HT[hashedKey] == -1)                            //   - if hit empty index
 			done = true;
-		else if (probingMethod == 2 && j == (capacity / 2) + 1)
+		else if (probingMethod == 2 && j == (size / 2) + 1)        //   - if cycled (quadratic)
 			done = true;
-		else if (j > capacity)
+		else if (j > size)                                         //   - if cycled (linear / double hashing)
 			done = true;
-		else
+		else                                                       //   - if hit colliding or deleted element
 			++j;
 	}
 
 	return found;
 }
 
-bool ProbingHashTable::deleteKey(int key) {
+bool ProbingHashTable::deleteKey(int key) {                        // function deleteKey
 	bool deleted = false;
 
-	int place = searchKey(key);
-	if (place != -1) {
+	int place = searchKeyIndex(key);                               // - call private search function (returns index)
+
+	if (place != -1) {                                             // - if found
 		deleted = true;
-		HT[place] = -2;
+		HT[place] = -2;                                            //   - set key to -2 (deleted flag)
 	}
 
 	return deleted;
 }
 
-void ProbingHashTable::rehash() {
-	int newCapacity = nextPrime(capacity * 2);
+void ProbingHashTable::rehash() {                                  // function rehash
+	int *htCopy = new int[size];
+	int sizeCopy = size;
 
-	bool inserted = false;
-	int *htCopy = new int[capacity];
-	for (int i = 0; i < capacity; ++i)
+	int newSize = nextPrime(size * 2);                             //  - compute new size (2 * cap) -> next prime
+
+	for (int i = 0; i < size; ++i)
 		htCopy[i] = HT[i];
-	int oldCapacity = capacity;
 
-	HT = new int[newCapacity];
+	HT = new int[newSize];
 	numItems = 0;
-	capacity = newCapacity;
+	size = newSize;
 
-	for (int i = 0; i < capacity; ++i)
+	for (int i = 0; i < size; ++i)
 		HT[i] = -1;
 
-	for (int i = 0; i < oldCapacity; ++i)                               // traverse linearly, rehash, insert
-		if(htCopy[i] >= 0)
-			insertKey(htCopy[i]);
+	for (int i = 0; i < sizeCopy; ++i)                             // - traverse linearly
+		if(htCopy[i] >= 0)                                         //   - if not empty / deleted element
+			insertKey(htCopy[i]);                                  //     - insert
 
 	delete[] htCopy;
-
 }
+
 
 void ProbingHashTable::resetTable() {
 	delete[] HT;
 	HT = nullptr;
 	numItems = 0;
-	capacity = 0;
+	size = 0;
 }
 
 ProbingHashTable& ProbingHashTable::operator=(const ProbingHashTable& copyHT) {
 	if (this != &copyHT) {
 		delete[] HT;
 		numItems = copyHT.numItems;
-		capacity = copyHT.capacity;
-		HT = new int[capacity];
+		size = copyHT.size;
+		HT = new int[size];
 
-		for (int i = 0; i < capacity; ++i)
+		for (int i = 0; i < size; ++i)
 			HT[i] = copyHT.HT[i];
-	} else {
+	} else
 		cerr << "Attempted assignment to itself." << endl;
-	}
 
 	return *this;
 }
 
+int ProbingHashTable::searchKeyIndex(int key) const {
+	bool cycled = false;
+	int j = 0;
+
+	while (!cycled) {
+		int hashedKey = hash(key, j);
+
+		if (j > size)
+			cycled = true;
+		else if (probingMethod == 2 && j >= (size + 1) / 2)        // quadratic
+			cycled = true;
+
+		if (HT[hashedKey] < 0)
+			return hashedKey;
+		else
+			++j;
+	}
+
+	return -1;
+}
+
 int ProbingHashTable::nextPrime(int i) const {
 	bool found = false;
-	++i;                                                                // num is always even
+	++i;                                                           // num is always even
 	while (!found) {
 		bool prime = true;
 		for (int j = 2; j * j <= i; ++j)
@@ -190,7 +198,7 @@ int ProbingHashTable::nextPrime(int i) const {
 
 int ProbingHashTable::prevPrime(int i) const {
 	bool found = false;
-	--i;                                                                // num is always even
+	--i;                                                           // num is always even
 	while (!found) {
 		bool prime = true;
 		for (int j = 2; j * j < i; ++j)

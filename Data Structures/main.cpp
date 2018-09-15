@@ -90,6 +90,23 @@ int main() {
 		wait();
 	}
 
+	i = 97;
+	while (i > 0) {
+		system("cls");
+		cout << "3. Testing deleteKey with prime numbers up to 100 with ";
+		if (probingHT.getProbingMethod() == 1)
+			cout << "linear probing" << endl;
+		else if (probingHT.getProbingMethod() == 2)
+			cout << "quadratic probing" << endl;
+		else if (probingHT.getProbingMethod() == 3)
+			cout << "double hashing" << endl;
+
+		probingHT.deleteKey(i);
+		cout << probingHT << endl;                                         // 6. test deleteKey
+		i = probingHT.prevPrime(i);
+		wait();
+	}
+
 
 	delete[] keys;
 	system("pause > nul");
