@@ -20,7 +20,8 @@ public:
 	int getProbingMethod() const { return probingMethod; }
 
 	void insertKey(int key);                                        // returns number of steps taken
-	bool searchKey(int key) const ;
+	bool searchKey(int key) const;
+	int stepsBefore(int key) const;                                     // searchKey but returns num of steps to the key
 	void timedSearch(int *keyArray, int numKeys) const;
 	bool deleteKey(int key);
 	void rehash();

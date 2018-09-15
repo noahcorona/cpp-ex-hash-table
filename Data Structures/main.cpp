@@ -11,7 +11,7 @@ using namespace std::chrono_literals;                                      // fo
 using std::chrono::system_clock;                                           // for sleep function
 
 
-const long int NUM_KEYS = 10000;                                           // number of keys used to compare efficiency
+const long int NUM_KEYS = 100000;                                          // number of keys used to compare efficiency
                                                                            // of collision resolution methods
 
 void wait() { 
@@ -47,17 +47,18 @@ int main() {
 	for (int i = 1; i <= 3; ++i) {
 		ProbingHashTable probingHT = ProbingHashTable(i);
 
-		cout << endl << "----------------------------------------------" << endl;
-		if (i == 1) cout << "                Linear probing";
-		else if (i == 2) cout << "               Quadratic probing";
-		else if (i == 3) cout << "                Double hashing";
-		cout << endl << "----------------------------------------------" << endl;
+		cout << endl << "--------------------------------------------------" << endl;
+		if (i == 1) cout << "                  Linear probing";
+		else if (i == 2) cout << "                 Quadratic probing";
+		else if (i == 3) cout << "                  Double hashing";
+		cout << endl << "--------------------------------------------------" << endl;
 		cout << endl << "Initial size: " << probingHT.getCapacity() << endl;
 
 		for (int j = 0; j < NUM_KEYS; ++j)
 			probingHT.insertKey(keys[j]);                                  // 2. test insertKey
 
-		cout << "Final size:   " << probingHT.getCapacity() << endl;
+		cout << "Final size:   " << probingHT.getCapacity()
+			<< endl << endl;
 
 		probingHT.timedSearch(keys, NUM_KEYS);                             // 3. test searchKey
 	}

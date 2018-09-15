@@ -59,6 +59,8 @@ void ProbingHashTable::insertKey(int key) {                        // function i
 			cycled = true;
 		else if (probingMethod == 2 && j >= (size + 1) / 2)
 			cycled = true;
+		else if (hashedKey < 0)
+			cycled = true;
 
 		if (HT[hashedKey] < 0)                                     //    - if empty or deleted
 			foundOpen = true;                                      //      - insert
@@ -97,6 +99,34 @@ bool ProbingHashTable::searchKey(int key) const {                  // function s
 	}
 
 	return found;
+}
+
+int ProbingHashTable::stepsBefore(int key) const {                     // function stepsTo
+	bool found = false;
+	bool done = false;
+	int j = 0;
+	int steps = 0;
+
+	while (!found && !done) {                                      // - while not found and not cycled
+		int hashedKey = hash(key, j);
+
+		if (HT[hashedKey] == key) {                                //   - if found our key
+			found = true;                                          //     - found = true
+			done = true;
+		}
+		else if (HT[hashedKey] == -1)                              //   - if hit empty index
+			done = true;
+		else if (probingMethod == 2 && j == (size / 2) + 1)        //   - if cycled (quadratic)
+			done = true;
+		else if (j > size)                                         //   - if cycled (linear / double hashing)
+			done = true;
+		else                                                       //   - if hit colliding or deleted element
+			++j;
+
+		++steps;
+	}
+
+	return steps;
 }
 
 bool ProbingHashTable::deleteKey(int key) {                        // function deleteKey
@@ -213,12 +243,18 @@ int ProbingHashTable::prevPrime(int i) const {
 }
 
 void ProbingHashTable::timedSearch(int *keyArray, int numKeys) const {
+	int steps = 0;
 	chrono::steady_clock::time_point begin = chrono::steady_clock::now();
 	for (int i = 0; i < numKeys; ++i)
-		searchKey(keyArray[i]);
+		steps += stepsBefore(keyArray[i]);
 	chrono::steady_clock::time_point end = chrono::steady_clock::now();
 
 	cout << "Searched for " << numKeys << " keys in " 
 		<< chrono::duration_cast<chrono::microseconds>(end - begin).count() 
-		<< " microseconds" << endl << endl;
+		<< " microseconds" << endl;
+
+	double avgSteps = static_cast<double>(steps) / static_cast<double>(numKeys);
+	cout << "Searching time complexity: O(" << avgSteps << ")" << endl;
+	double avgTime = static_cast<double>(chrono::duration_cast<chrono::microseconds>(end - begin).count()) / numKeys;
+	cout << "Avg. time to find a key: " << avgTime << " microseconds" << endl << endl;
 }
