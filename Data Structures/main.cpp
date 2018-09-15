@@ -6,12 +6,8 @@ using namespace std;
 
 int main() {
 	// initialize the range of the keys
-	const int KEY_RANGE_LB = 0;
-	const int KEY_RANGE_UB = 50;
-
-	// initialize the range of the random values (no affect on anything)
-	const int VALUE_RANGE_LB = 0;
-	const int VALUE_RANGE_UB = 10;
+	const int KEY_RANGE_LB = 1000;
+	const int KEY_RANGE_UB = 1200;
 
 	// number of pigeons (+ 1 is for the inclusive upper bound)
 	const int NUM_KEYS = KEY_RANGE_UB - KEY_RANGE_LB + 1;
@@ -23,10 +19,12 @@ int main() {
 	// limited printing for large structures
 	const bool SAFE_PRINTING = false;
 	// print out any generated keys
-	const bool PRINT_GENERATION = true;
+	const bool PRINT_GENERATION = false;
+
+	int probingMethod;
 
 	// generate our randomized input data, store in key array
-	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB + 1, VALUE_RANGE_LB, VALUE_RANGE_UB);
+	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB + 1);
 	int *keyArray = keyGen.keyArray;
 
 	if (PRINT_GENERATION) {
@@ -175,7 +173,7 @@ int main() {
 					cin >> inText;
 					cout << endl << endl;
 
-					int probingMethod;
+
 					if (inText == "1")
 						probingMethod = 1;
 					else if (inText == "2")
@@ -183,8 +181,17 @@ int main() {
 					else if (inText == "3")
 						probingMethod = 3;
 
+					system("cls");
+					cout << "Enter size: ";
+					cin >> inText;
+					cout << endl << endl;
+
 					// create hash table with probing from keyArray
-					probingHT = ProbingHashTable(1, keyArray, NUM_KEYS, animatedCreate);
+					system("cls");
+					probingHT = ProbingHashTable(probingMethod, keyArray, stoi(inText), animatedCreate);
+					cout << endl << endl << "Press any key to continue...";
+					system("pause > nul");
+					inText = "1";
 				} else if (inText == "2") {
 					// create empty hash table
 					system("cls");
@@ -217,21 +224,27 @@ int main() {
 					<< "3. Insert a key" << endl
 					<< "4. Print the table" << endl
 					<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
+					<< "6. Rehash generated keys with new probing method (currently: " << probingMethod << ")" << endl
+					<< "7. Compare efficiencies" << endl
 					<< "'x' to exit" << endl << endl;
 
 				cin >> inText;
 				cout << endl;
 
 				while (inText != "x") {
-					if (inText == "1") {                        // search for a key (to do)
-						
+					if (inText == "1") {                        // search for a key
+						string key;
+						cout << endl << "Enter a key: ";
+						cin >> key;
+
+						cout << "Found in " << probingHT.searchKey(stoi(key))
+							<< " steps" << endl;
+						system("pause > nul");
 					} else if (inText == "2") {                 // delete a key (to do)
 						
 					} else if (inText == "3") {                 // insert a key
 						
 						string key;
-						string value;
-
 						cout << endl << "Enter a key: ";
 						cin >> key;
 
@@ -247,6 +260,33 @@ int main() {
 						system("pause > nul");
 					} else if (inText == "5") {                  // toggle animations
 						animationsOn = !animationsOn;
+					} else if (inText == "6") {
+						system("cls");
+						cout << "Enter probing method: " << endl
+							<< "1. Linear" << endl
+							<< "2. Quadratic" << endl
+							<< "3. Double hashing" << endl << endl;
+						cin >> inText;
+
+						int probingMethod;
+						if (inText == "1")
+							probingMethod = 1;
+						else if (inText == "2")
+							probingMethod = 2;
+						else if (inText == "3")
+							probingMethod = 3;
+
+						probingHT.resetTable();
+						system("cls");
+						probingHT = ProbingHashTable(probingMethod, keyArray, NUM_KEYS, false);
+					} else if (inText == "7") {
+						system("cls");
+						for (int i = 1; i <= 3; ++i) {
+							probingHT.resetTable();
+							probingHT = ProbingHashTable(i, keyArray, NUM_KEYS, false);
+						}
+						cout << endl << endl << "Press any key to continue...";
+						system("pause > nul");
 					}
 
 					system("cls");
@@ -257,6 +297,8 @@ int main() {
 						<< "3. Insert a key" << endl
 						<< "4. Print the table" << endl
 						<< "5. Toggle Animations (currently: " << (animationsOn ? "on" : "off") << ")" << endl
+						<< "6. Rehash generated keys with new probing method (currently: " << probingMethod << ")" << endl
+						<< "7. Compare efficiencies" << endl
 						<< "'x' to exit" << endl << endl;
 
 					cin >> inText;

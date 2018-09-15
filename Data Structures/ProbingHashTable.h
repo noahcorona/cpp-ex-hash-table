@@ -6,9 +6,9 @@ using namespace std;
 class ProbingHashTable {
 	friend ostream& operator<<(ostream& out, const ProbingHashTable& printHT);
 public:
-	// "stanard" functions
+	// "standard" functions
 	ProbingHashTable();                                            // default constructor
-	ProbingHashTable(const ProbingHashTable& otherHT);             // copy constructor
+	//ProbingHashTable(const ProbingHashTable& otherHT);             // copy constructor
 	//ProbingHashTable(const ProbingHashTable&& otherHT);            // move constructor
 
 	void setHT(int *newHT) { HT = newHT; }                         // mutators
@@ -16,8 +16,8 @@ public:
 	int* getHT() const { return HT; }                              // accessors
 	int getCapacity() const { return capacity; }
 
-	void insertKey(int newKey);
-	int searchKey(int key);
+	int insertKey(int key);                                        // returns number of steps taken
+	int searchKey(int key) const ;
 	bool deleteKey(int key);
 	void rehash();
 	void resetTable();
@@ -26,8 +26,8 @@ public:
 	int prevPrime(int num) const;
 	int nextPrime(int num) const;
 
-	//ProbingHashTable& operator=(const ProbingHashTable& otherHT);  // copy assignment
-	//ProbingHashTable& operator=(const ProbingHashTable&& otherHT); // move assignment
+	ProbingHashTable& operator=(const ProbingHashTable& otherHT);  // copy assignment
+//	ProbingHashTable& operator=(const ProbingHashTable&& otherHT); // move assignment
 
 	~ProbingHashTable() { }                                        // destructor
 
@@ -37,14 +37,14 @@ public:
 	ProbingHashTable(int newProbingMethod, int newCapacity);
 	ProbingHashTable(int newProbingMethod, int *keyArray, int numKeys);
 	ProbingHashTable(int newProbingMethod, int *keyArray, int numKeys, bool animationsOn);
-	void insertKeyAnimated(int newKey);
+	int insertKeyAnimated(int newKey);
 private:
 	int* HT;
 	int probingMethod;
 	int capacity;
-	int numOfElements;
+	int numItems;
 
-	int hash(int key, int j) {
+	int hash(int key, int j) const {
 		int k = key;
 
 		if (probingMethod == 1)
@@ -60,11 +60,13 @@ private:
 
 	}
 
-	int secondHash(int k, int q) {                                 // double hash function
+	int secondHash(int k, int q) const {                                 // double hash function
 		return q - (k % q);
 	}
 
-	int searchKey(int key) const;                                  // returns index
+	//int searchKey(int key) const {
+	//	return hash(key, 0);
+	//} // returns index
 };
 
 #endif

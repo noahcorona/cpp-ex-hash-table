@@ -1,7 +1,16 @@
 #include <iostream>
 #include "ProbingHashTable.h"
 
+// for delay
+#include <chrono>
+#include <thread>
+
 using namespace std;
+
+//for delay
+using namespace std::this_thread;
+using namespace std::chrono_literals;
+using std::chrono::system_clock;
 
 const int PROBING_METHOD = 1;                       // 1. linear 2. quadratic 3. double hashing
 const int INITIAL_CAPACITY = 20;
@@ -22,85 +31,102 @@ ostream& operator<<(ostream& out, const ProbingHashTable& printHT) {
 ProbingHashTable::ProbingHashTable() {
 	probingMethod = 1;
 	capacity = INITIAL_CAPACITY;
-	numOfElements = 0;
+	numItems = 0;
 	HT = new int[capacity];
 
-	for (int i = 0; i < capacity; ++i) {
+	for (int i = 0; i < capacity; ++i)
 		HT[i] = -1;
-	}
 }
 
-void ProbingHashTable::insertKey(int key) {
-	int cycleBegin = (capacity + 1) / 2;
-	int j = 0;
+int ProbingHashTable::insertKey(int key) {
 	bool inserted = false;
-	bool repeated = false;
+	bool cycled = false;
+	int j = 0;
+	int stepsTaken = 0;
 
-	while (!inserted && !repeated) {
-		int hashedKey = hash(key, j);                // calculate hash
+	while (!inserted && !cycled) {
+		int hashedKey = hash(key, j);
 
-		if (hashedKey != cycleBegin) {               // if at cycle start & not starting
-			if (HT[hashedKey] == -1) {               // probe value
-				HT[hashedKey] = key;
-				inserted = true;                     // insert
-			} else
-				++j;
-		} else {
-			if (j == 0) {
-				if (HT[hashedKey] == -1) {           // probe value
-					HT[hashedKey] = key;
-					inserted = true;                 // insert
-				} else
-					++j;
-			} else
-				repeated = true;
-		}
+		if (probingMethod != 2 && j > capacity) {                   // linear or double hash
+				cycled = true;
+		} else if (probingMethod == 2 && j >= (capacity + 1) / 2)         // quadratic
+			cycled = true;
+
+		if (HT[hashedKey] < 0) {
+			HT[hashedKey] = key;
+			inserted = true;
+		} else
+			++j;
+
+		++stepsTaken;
 	}
 
-	// if we completed a cycle finding an open index
-	// or we have reached our functional capacity
+	stepsTaken += j;
 
-	if (numOfElements == (capacity * 2) / 3) {
-
+	if (cycled) {
 		rehash();
-
-		// insert our key
 		j = 0;
-		inserted = false;
 
 		while (!inserted) {
-			int hashedKey = hash(key, j);           // calculate hash
-			if (HT[hashedKey] == -1) {              // probe value
+			int hashedKey = hash(key, j);
+
+			if (HT[hashedKey] < 0) {
 				HT[hashedKey] = key;
 				inserted = true;
-				++numOfElements;
-			} else
+			} else 
 				++j;
+
+			++stepsTaken;
 		}
-
-		system("cls");
-		if (numOfElements == (capacity * 2) / 3) cout << "Hit functional capacity or reached a full cycle." << endl << endl;
-		cout << "Resized to length: " << capacity << endl << endl;
-
-		system("pause > nul");
-		cout << "Press any key to continue...";
 	}
 
-	++numOfElements;
+	stepsTaken += j;
+	++numItems;
+
+	return stepsTaken;
+}
+
+int ProbingHashTable::searchKey(int key) const {
+	bool done = false;
+	int j = 0;
+
+	while (!done) {
+		int hashedKey = hash(key, j);
+
+		if (HT[hashedKey] == -1 ||
+			j == (capacity + 1) / 2)
+			done = true;
+		else if (HT[hashedKey] == key) 
+			return j;
+		else
+			++j;
+	}
+
+	return -1;
+}
+
+bool ProbingHashTable::deleteKey(int key) {
+	bool deleted = false;
+
+	int place = searchKey(key);
+	if (place != -1) {
+		deleted = true;
+		HT[place] = -2;
+	}
+
+	return deleted;
 }
 
 void ProbingHashTable::rehash() {
 	// create new array with next prime
 	int newCapacity = nextPrime(capacity * 2);
-	int *newArray = new int[newCapacity];
+	int *newHT = new int[newCapacity];
+	for (int i = 0; i < newCapacity; ++i)
+		newHT[i] = -1;
+
 	int cycleBegin = (newCapacity + 1) / 2;
 
-	// initialize new array with -1 values
-	for (int i = 0; i < newCapacity; ++i) {
-		newArray[i] = -1;
-	}
-
-	bool inserted;
+	bool inserted = false;
 
 	// traverse linearly, rehash, insert
 	for (int i = 0; i < capacity; ++i) {
@@ -108,22 +134,46 @@ void ProbingHashTable::rehash() {
 		int key = HT[i];
 		inserted = false;
 
-		while (!inserted) {
-			int hashedKey = hash(key, j);        // calculate hash
-			if (newArray[hashedKey] == -1) {     // probe value
-				newArray[hashedKey] = key;
-				inserted = true;                 // insert
-				//numOfElements is unchanged, no need to update
+		if(key >= 0)
+			while (!inserted) {
+				int hashedKey = hash(key, j);           // calculate hash
+				int storedKey = newHT[hashedKey];
+				if (storedKey < 0) {                    // probe value
+					newHT[hashedKey] = key;
+					inserted = true;                    // insert
+					//numOfElements is unchanged, no need to update
+				} else
+					++j;
 			}
-			else
-				++j;
 		}
-	}
 
 	// free old array from memory, reassign
 	delete[] HT;
-	HT = newArray;
+	HT = newHT;
 	capacity = newCapacity;
+}
+
+void ProbingHashTable::resetTable() {
+	delete[] HT;
+	HT = nullptr;
+	numItems = 0;
+	capacity = 0;
+}
+
+ProbingHashTable& ProbingHashTable::operator=(const ProbingHashTable& copyHT) {
+	if (this != &copyHT) {
+		delete[] HT;
+		numItems = copyHT.numItems;
+		capacity = copyHT.capacity;
+		HT = new int[capacity];
+
+		for (int i = 0; i < capacity; ++i)
+			HT[i] = copyHT.HT[i];
+	} else {
+		cerr << "Attempted assignment to itself." << endl;
+	}
+
+	return *this;
 }
 
 // extra functions
@@ -131,34 +181,31 @@ void ProbingHashTable::rehash() {
 ProbingHashTable::ProbingHashTable(int newCapacity) {
 	probingMethod = PROBING_METHOD;
 	capacity = newCapacity;
-	numOfElements = 0;
+	numItems = 0;
 	HT = new int[capacity];
 
-	for (int i = 0; i < capacity; ++i) {
+	for (int i = 0; i < capacity; ++i)
 		HT[i] = -1;
-	}
 }
 
 ProbingHashTable::ProbingHashTable(int newProbingMethod, int newCapacity) {
 	probingMethod = newProbingMethod;
 	capacity = newCapacity;
-	numOfElements = 0;
+	numItems = 0;
 	HT = new int[capacity];
 
-	for (int i = 0; i < capacity; ++i) {
+	for (int i = 0; i < capacity; ++i)
 		HT[i] = -1;
-	}
 }
 
 ProbingHashTable::ProbingHashTable(int newProbingMethod, int *keyArray, int keyArraySize) {
 	probingMethod = newProbingMethod;
 	capacity = keyArraySize;
-	numOfElements = keyArraySize;
+	numItems = keyArraySize;
 	HT = new int[capacity];
 
-	for (int i = 0; i < capacity; ++i) {
+	for (int i = 0; i < capacity; ++i)
 		HT[i] = -1;
-	}
 
 	for (int i = 0; i < keyArraySize; ++i)
 		insertKey(keyArray[i]);
@@ -167,29 +214,37 @@ ProbingHashTable::ProbingHashTable(int newProbingMethod, int *keyArray, int keyA
 ProbingHashTable::ProbingHashTable(int newProbingMethod, int *keyArray, int keyArraySize, bool animationsOn) {
 	probingMethod = newProbingMethod;
 	capacity = keyArraySize;
-	numOfElements = keyArraySize;
+	numItems = 0;
 	HT = new int[capacity];
+	int stepsTaken = 0;
 
-	for (int i = 0; i < capacity; ++i) {
+	for (int i = 0; i < capacity; ++i)
 		HT[i] = -1;
+
+	for (int i = 0; i < keyArraySize; ++i) {
+
+		if (animationsOn)
+			stepsTaken += insertKeyAnimated(keyArray[i]);
+		else
+			stepsTaken += insertKey(keyArray[i]);
 	}
 
-	for (int i = 0; i < keyArraySize; ++i)
-		if (animationsOn)
-			insertKeyAnimated(keyArray[i]);
-		else
-			insertKey(keyArray[i]);
+	cout << "Inserted " << numItems << " elements in " << stepsTaken << " steps using ";
+	if (probingMethod == 1) cout << "linear probing";
+	else if (probingMethod == 2) cout << "quadratic probing";
+	else if (probingMethod == 3) cout << "double hashing";
+	cout << ", final size:" << capacity << endl;
+	stepsTaken = 0;
 }
 
-int ProbingHashTable::nextPrime(int num) const {
+int ProbingHashTable::nextPrime(int i) const {
 	bool found = false;
-	int i = num + 1;   // num is always even
+	++i;   // num is always even
 	while (!found) {
 		bool prime = true;
-		for (int j = 2; j * j < i; ++j) {
+		for (int j = 2; j * j < i; ++j)
 			if (i % j == 0)
 				prime = false;
-		}
 
 		if (prime) found = true;
 		else ++i;
@@ -198,15 +253,14 @@ int ProbingHashTable::nextPrime(int num) const {
 	return i;
 }
 
-int ProbingHashTable::prevPrime(int num) const {
+int ProbingHashTable::prevPrime(int i) const {
 	bool found = false;
-	int i = num - 1;
+	--i;
 	while (!found) {
 		bool prime = true;
-		for (int j = 2; j * j < i; ++j) {
+		for (int j = 2; j * j < i; ++j)
 			if (i % j == 0)
 				prime = false;
-		}
 
 		if (prime) found = true;
 		else --i;
@@ -215,116 +269,96 @@ int ProbingHashTable::prevPrime(int num) const {
 	return i;
 }
 
-void ProbingHashTable::insertKeyAnimated(int key) {
-	int cycleBegin = (capacity + 1) / 2;
-	int j = 0;
+int ProbingHashTable::insertKeyAnimated(int key) {
 	bool inserted = false;
-	bool repeated = false;
+	bool cycled = false;
+	int j = 0;
+	int stepsTaken = 0;
 
-	system("cls");
-	cout << " Attempting to insert " << key << endl
-		<< "------------------------------" << endl << endl;
-	for (int i = 0; i < capacity; ++i) {
-		if (i == hash(key, 0)) {
-			// print key and dont print empty slots
-			if (j == (capacity + 1) / 2) {
-				cout << "   " << i << ". (" << HT[i] << ")   CYCLE START" << endl;
-			}
-			else if (HT[i] == -1)
-				cout << "   " << i << ". (" << HT[i] << ")   SUCCESS" << endl;
-			else
-				cout << "   " << i << ". (" << HT[i] << ")   FAIL" << endl;
-		}
-		else
-			if (HT[i] != -1)
-				cout << "   " << i << ". (" << HT[i] << ")" << endl;
-			else
-				cout << "   " << i << ". " << endl;
+	while (!inserted && !cycled) {
+		int hashedKey = hash(key, j);
 
-	}
+		if (probingMethod != 2 && j > capacity) {                   // linear or double hash
+			cycled = true;
+		} else if (probingMethod == 2 && j >= (capacity + 1) / 2)         // quadratic
+			cycled = true;
 
-	while (!inserted && !repeated && numOfElements + 1 < (capacity * 2) / 3) {
-		int hashedKey = hash(key, j);                // calculate hash
+		if (HT[hashedKey] < 0) {
+			HT[hashedKey] = key;
+			inserted = true;
+		} else
+			++j;
 
-		if (hashedKey != cycleBegin) {               // if at cycle start & not starting
-			if (HT[hashedKey] == -1) {           // probe value
-				HT[hashedKey] = key;
-				inserted = true;                 // insert
-				++numOfElements;
-			}
-			else
-				++j;
-		}
-		else {
-			if (j == 0) {
-				if (HT[hashedKey] == -1) {            // probe value
-					HT[hashedKey] = key;
-					inserted = true;                  // insert
-					++numOfElements;
-				}
-				else
-					++j;
-			}
-			else
-				repeated = true;
-		}
-	}
-
-	bool resized = false;                           // check if we resized
-
-	if (!inserted ||
-		repeated ||
-		numOfElements == (capacity * 2) / 3) {
-
-		resized = true;
-
-		rehash();
-
-		// insert our key
-		j = 0;
-		inserted = false;
-
-		while (!inserted) {
-			int hashedKey = hash(key, j);           // calculate hash
-			if (HT[hashedKey] == -1) {              // probe value
-				HT[hashedKey] = key;
-				inserted = true;
-				++numOfElements;
-			}
-			else
-				++j;
-		}
+		++stepsTaken;
 
 		system("cls");
-		if (numOfElements == (capacity * 2) / 3) {
-			cout << "Hit functional capacity or reached a full cycle." << endl << endl;
-			cout << "Resized to length: " << capacity << endl << endl;
+		cout << " Attempting to insert " << key << endl
+			<< "------------------------------" << endl << endl;
+		for (int i = 0; i < capacity; ++i) {
+			if (i == hash(key, j)) {
+				// print key and dont print empty slots
+				if (j == (capacity + 1) / 2) {
+					cout << "   " << i << ". (" << HT[i] << ")   CYCLE START" << endl;
+				} else if (HT[i] == key)
+					cout << "   " << i << ". (" << HT[i] << ")   SUCCESS" << endl;
+				else
+					cout << "   " << i << ". (" << HT[i] << ")   FAIL" << endl;
+			} else
+				if (HT[i] != -1)
+					cout << "   " << i << ". (" << HT[i] << ")" << endl;
+				else
+					cout << "   " << i << ". " << endl;
 		}
-		system("pause > nul");
-		cout << "Press any key to continue...";
+
+		sleep_for(5ns);
+		sleep_until(system_clock::now() + 5ns);
 	}
 
-	system("cls");
-	cout << " Attempting to insert " << key << endl
-		<< "------------------------------" << endl << endl;
-	for (int i = 0; i < capacity; ++i) {
-		if (i == hash(key, 0)) {
-			// print key and dont print empty slots
-			if (j == (capacity + 1) / 2) {
-				cout << "   " << i << ". (" << HT[i] << ")   CYCLE START" << endl;
+	stepsTaken += j;
+
+	if (cycled) {
+		rehash();
+		cout << "Resized to size of " << capacity << endl << endl;
+
+		// wait 1 second
+		sleep_for(5ns);
+		sleep_until(system_clock::now() + 5ns);
+
+		j = 0;
+
+		while (!inserted) {
+			int hashedKey = hash(key, j);
+
+			if (HT[hashedKey] < 0) {
+				HT[hashedKey] = key;
+				inserted = true;
+			} else
+				++j;
+
+			++stepsTaken;
+
+			system("cls");
+			cout << " Attempting to insert " << key << endl
+				<< "------------------------------" << endl << endl;
+			for (int i = 0; i < capacity; ++i) {
+				if (i == hash(key, j)) {
+					// print key and dont print empty slots
+					if (HT[i] == key)
+						cout << "   " << i << ". (" << HT[i] << ")   SUCCESS" << endl;
+					else
+						cout << "   " << i << ". (" << HT[i] << ")   FAIL" << endl;
+				} else
+					if (HT[i] != -1)
+						cout << "   " << i << ". (" << HT[i] << ")" << endl;
+					else
+						cout << "   " << i << ". " << endl;
 			}
-			else if (HT[i] == key)
-				cout << "   " << i << ". (" << HT[i] << ")   SUCCESS" << endl;
-			else
-				cout << "   " << i << ". (" << HT[i] << ")   FAIL" << endl;
-		}
-		else
-			if (HT[i] != -1)
-				cout << "   " << i << ". (" << HT[i] << ")" << endl;
-			else
-				cout << "   " << i << ". " << endl;
-	}
 
-	cout << endl << endl << "Press any key to continue...";
-	system("pause > nul");
+			sleep_for(5ns);
+			sleep_until(system_clock::now() + 5ns);
+		}
+	}
+	stepsTaken += j;
+	++numItems;
+	return stepsTaken;
 }

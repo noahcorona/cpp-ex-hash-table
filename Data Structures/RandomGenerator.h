@@ -17,45 +17,31 @@ public:
 	int *keyArray;
 	KVPair *keyValueArray;
 
-	RandomGenerator(int newKeyRangeLB, int newKeyRangeUB, int newValueRangeLB, int newValueRangeUB) {
-		keyRangeLB = newKeyRangeLB;
-		keyRangeUB = newKeyRangeUB;
-		valueRangeLB = newValueRangeLB;
-		valueRangeUB = newValueRangeUB;
-
-		int size = keyRangeUB - keyRangeLB;
-
-		// create (key, value) array
-		keyValueArray = new KVPair[size];
-
-		for (int i = 0; i < size; ++i) {
-			keyValueArray[i].key = i;
-			keyValueArray[i].value = getValue();
-		}
-
-		for (int i = 0; i < size; ++i)
-			shuffleOneRandom(keyValueArray);
-
-		// create key only array
-		keyArray = new int[size];
-		for (int i = 0; i < size; ++i)
-			keyArray[i] = i;
-
-		for (int i = 0; i < size; ++i)
-			shuffleOneRandom(keyArray);
-
-	}
-
-private:
 	void shuffleOneRandom(int* arr) {
-		int firstIndex = getKey();
-		int secondIndex = getKey();
+		int firstIndex = getKey() - keyRangeLB;
+		int secondIndex = getKey() - keyRangeLB;
 		int first = arr[firstIndex];
 		int second = arr[secondIndex];
 		int temp = second;
 		arr[secondIndex] = first;
 		arr[firstIndex] = temp;
 	}
+
+	RandomGenerator(int newKeyRangeLB, int newKeyRangeUB) {
+		keyRangeLB = newKeyRangeLB;
+		keyRangeUB = newKeyRangeUB;
+
+		int size = keyRangeUB - keyRangeLB;
+		// create key array
+		keyArray = new int[size];
+		for (int i = 0; i < size; ++i)
+			keyArray[i] = size - i - 1;
+
+		for (int i = 0; i < size; ++i)
+			shuffleOneRandom(keyArray);
+	}
+
+private:
 
 	void shuffleOneRandom(KVPair* arr) {
 		int firstIndex = getKey();
