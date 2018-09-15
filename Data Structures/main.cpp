@@ -6,11 +6,11 @@ using namespace std;
 
 int main() {
 	// initialize the range of the keys
-	const int KEY_RANGE_LB = 1000;
-	const int KEY_RANGE_UB = 1200;
+	const int KEY_RANGE_LB = 50000;
+	const int KEY_RANGE_UB = 150000;
 
 	// number of pigeons (+ 1 is for the inclusive upper bound)
-	const int NUM_KEYS = KEY_RANGE_UB - KEY_RANGE_LB + 1;
+	const int NUM_KEYS = KEY_RANGE_UB - KEY_RANGE_LB;
 
 	// number of holes (for chaining, num keys != num slots)
 	const int NUM_SLOTS = 5;
@@ -24,8 +24,9 @@ int main() {
 	int probingMethod;
 
 	// generate our randomized input data, store in key array
-	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB + 1);
+	RandomGenerator keyGen = RandomGenerator(KEY_RANGE_LB, KEY_RANGE_UB);
 	int *keyArray = keyGen.keyArray;
+	int keyArraySize = KEY_RANGE_UB - KEY_RANGE_LB;
 
 	if (PRINT_GENERATION) {
 		cout << "Shuffled keys" << endl
@@ -35,7 +36,6 @@ int main() {
 		}
 		cout << endl << endl;
 	}
-
 
 	cout << "Data Structures" << endl 
 		<< "---------------" << endl
@@ -136,8 +136,6 @@ int main() {
 					cout << endl;
 				}
 			}
-
-
 		} else if (inText == "2") {
 			ProbingHashTable probingHT;
 			bool animationsOn = true;
@@ -181,14 +179,9 @@ int main() {
 					else if (inText == "3")
 						probingMethod = 3;
 
-					system("cls");
-					cout << "Enter size: ";
-					cin >> inText;
-					cout << endl << endl;
-
 					// create hash table with probing from keyArray
 					system("cls");
-					probingHT = ProbingHashTable(probingMethod, keyArray, stoi(inText), animatedCreate);
+					probingHT = ProbingHashTable(probingMethod, keyArray, NUM_KEYS / 2, animatedCreate);
 					cout << endl << endl << "Press any key to continue...";
 					system("pause > nul");
 					inText = "1";
@@ -278,12 +271,11 @@ int main() {
 
 						probingHT.resetTable();
 						system("cls");
-						probingHT = ProbingHashTable(probingMethod, keyArray, NUM_KEYS, false);
+						probingHT = ProbingHashTable(probingMethod, keyArray, NUM_KEYS / 2, false);
 					} else if (inText == "7") {
 						system("cls");
 						for (int i = 1; i <= 3; ++i) {
-							probingHT.resetTable();
-							probingHT = ProbingHashTable(i, keyArray, NUM_KEYS, false);
+							ProbingHashTable newHT = ProbingHashTable(i, keyArray, NUM_KEYS / 2, false);
 						}
 						cout << endl << endl << "Press any key to continue...";
 						system("pause > nul");

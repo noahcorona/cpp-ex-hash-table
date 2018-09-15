@@ -44,12 +44,10 @@ int ProbingHashTable::insertKey(int key) {
 	int j = 0;
 	int stepsTaken = 0;
 
-	while (!inserted && !cycled) {
+	while (!inserted && !cycled && j < capacity) {
 		int hashedKey = hash(key, j);
-
-		if (probingMethod != 2 && j > capacity) {                   // linear or double hash
-				cycled = true;
-		} else if (probingMethod == 2 && j >= (capacity + 1) / 2)         // quadratic
+		
+		if (probingMethod == 2 && j >= (capacity + 1) / 2)         // quadratic
 			cycled = true;
 
 		if (HT[hashedKey] < 0) {
@@ -67,7 +65,7 @@ int ProbingHashTable::insertKey(int key) {
 		rehash();
 		j = 0;
 
-		while (!inserted) {
+		while (!inserted && j <= capacity) {
 			int hashedKey = hash(key, j);
 
 			if (HT[hashedKey] < 0) {
@@ -78,6 +76,9 @@ int ProbingHashTable::insertKey(int key) {
 
 			++stepsTaken;
 		}
+
+		if (j == capacity)
+			cerr << "Not good" << endl;
 	}
 
 	stepsTaken += j;
@@ -97,7 +98,7 @@ int ProbingHashTable::searchKey(int key) const {
 			j == (capacity + 1) / 2)
 			done = true;
 		else if (HT[hashedKey] == key) 
-			return j;
+			return j + 1;
 		else
 			++j;
 	}
@@ -120,36 +121,21 @@ bool ProbingHashTable::deleteKey(int key) {
 void ProbingHashTable::rehash() {
 	// create new array with next prime
 	int newCapacity = nextPrime(capacity * 2);
-	int *newHT = new int[newCapacity];
-	for (int i = 0; i < newCapacity; ++i)
-		newHT[i] = -1;
-
-	int cycleBegin = (newCapacity + 1) / 2;
 
 	bool inserted = false;
+	int *htCopy = HT;
+	HT = new int[newCapacity];
+	numItems = 0;
+
+	for (int i = 0; i < newCapacity; ++i)
+		HT[i] = -1;
 
 	// traverse linearly, rehash, insert
-	for (int i = 0; i < capacity; ++i) {
-		int j = 0;
-		int key = HT[i];
-		inserted = false;
+	for (int i = 0; i < capacity; ++i)
+		if(htCopy[i] > 0)
+			insertKey(htCopy[i]);
 
-		if(key >= 0)
-			while (!inserted) {
-				int hashedKey = hash(key, j);           // calculate hash
-				int storedKey = newHT[hashedKey];
-				if (storedKey < 0) {                    // probe value
-					newHT[hashedKey] = key;
-					inserted = true;                    // insert
-					//numOfElements is unchanged, no need to update
-				} else
-					++j;
-			}
-		}
-
-	// free old array from memory, reassign
-	delete[] HT;
-	HT = newHT;
+	delete[] htCopy;
 	capacity = newCapacity;
 }
 
@@ -234,7 +220,16 @@ ProbingHashTable::ProbingHashTable(int newProbingMethod, int *keyArray, int keyA
 	else if (probingMethod == 2) cout << "quadratic probing";
 	else if (probingMethod == 3) cout << "double hashing";
 	cout << ", final size:" << capacity << endl;
-	stepsTaken = 0;
+
+	int searchSteps = 0;
+	cout << "Searching for each of the " << keyArraySize << " keys..." << endl;
+	for (int i = 0; i < keyArraySize; ++i)
+		if (searchKey(keyArray[i]) >= 0)
+			searchSteps += searchKey(keyArray[i]);
+		//else
+		//	cout << "Did not find " << keyArray[i] << endl;
+
+	cout << "Completed in " << searchSteps << " steps" << endl << endl;
 }
 
 int ProbingHashTable::nextPrime(int i) const {
