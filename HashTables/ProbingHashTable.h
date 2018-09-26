@@ -34,7 +34,7 @@ public:
 	ProbingHashTable& operator=(const ProbingHashTable& otherHT);  // copy assignment
 //	ProbingHashTable& operator=(const ProbingHashTable&& otherHT); // move assignment
 
-	~ProbingHashTable() { }                                        // destructor
+    ~ProbingHashTable() { delete[] HT; }                                        // destructor
 private:
 	int* HT;
 	int probingMethod;
