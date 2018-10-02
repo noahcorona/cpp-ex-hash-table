@@ -71,39 +71,18 @@ void ProbingHashTable::insertKey(int key) {                        // function i
     if (foundOpen) {                                               //  - if found open spot
         HT[hashedKey] = key;                                       //    - insert
         ++numItems;
-    }
-    else {                                                       //  - else
+    } else {                                                       //  - else
         rehash();                                                  //    - rehash
-        insertKey(key);                                            //    - call insertKey recursively
+        insertKey(key);                                            //    - insert
     }
 }
 
 bool ProbingHashTable::searchKey(int key) const {                  // function searchKey
-    bool found = false;
-    bool done = false;
-    int j = 0;
-
-    while (!found && !done) {                                      // - while not found and not cycled
-        int hashedKey = hash(key, j);
-
-        if (HT[hashedKey] == key) {                                //   - if found our key
-            found = true;                                          //     - found = true
-            done = true;
-        }
-        else if (HT[hashedKey] == -1)                            //   - if hit empty index
-            done = true;
-        else if (probingMethod == 2 && j == (size / 2) + 1)        //   - if cycled (quadratic)
-            done = true;
-        else if (j > size)                                         //   - if cycled (linear / double hashing)
-            done = true;
-        else                                                       //   - if hit colliding or deleted element
-            ++j;
-    }
-
-    return found;
+    if (searchKeyIndex(key) >= 0) return true;
+    else return false;
 }
 
-int ProbingHashTable::stepsBefore(int key) const {                     // function stepsTo
+int ProbingHashTable::stepsBefore(int key) const {                 // function stepsTo
     bool found = false;
     bool done = false;
     int j = 0;
@@ -145,26 +124,20 @@ bool ProbingHashTable::deleteKey(int key) {                        // function d
 }
 
 void ProbingHashTable::rehash() {                                  // function rehash
-    int *htCopy = new int[size];
-    int sizeCopy = size;
+    int oldSize = size;
+    int *oldHT = HT;
 
-    int newSize = nextPrime(size * 2);                             //  - compute new size (2 * cap) -> next prime
+    size = nextPrime(size * 2);                                    //  - compute new size (2 * cap) -> next prime
+    HT = new int[size];
 
-    for (int i = 0; i < size; ++i)
-        htCopy[i] = HT[i];
-
-    HT = new int[newSize];
-    numItems = 0;
-    size = newSize;
-
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < size; ++i) 
         HT[i] = -1;
 
-    for (int i = 0; i < sizeCopy; ++i)                             // - traverse linearly
-        if (htCopy[i] >= 0)                                         //   - if not empty / deleted element
-            insertKey(htCopy[i]);                                  //     - insert
+    for (int i = 0; i < oldSize; ++i)                              // - traverse linearly
+        if (oldHT[i] >= 0)                                         //   - if not empty / deleted element
+            insertKey(oldHT[i]);                                   //     - insert
 
-    delete[] htCopy;
+    delete[] oldHT;
 }
 
 
@@ -198,11 +171,11 @@ int ProbingHashTable::searchKeyIndex(int key) const {
     while (!cycled) {
         int hashedKey = hash(key, j);
 
-        if (j > size)
+        if (j >= size)
             cycled = true;
         else if (probingMethod == 2 && j >= (size + 1) / 2)        // quadratic
             cycled = true;
-
+        
         if (HT[hashedKey] < 0)
             return hashedKey;
         else
@@ -214,8 +187,8 @@ int ProbingHashTable::searchKeyIndex(int key) const {
 
 int ProbingHashTable::nextPrime(int i) const {
     bool found = false;
-    ++i;                                                           // num is always even
     while (!found) {
+        ++i;
         bool prime = true;
         for (int j = 2; j * j <= i; ++j)
             if (i % j == 0)
@@ -231,15 +204,14 @@ int ProbingHashTable::nextPrime(int i) const {
 
 int ProbingHashTable::prevPrime(int i) const {
     bool found = false;
-    --i;                                                           // num is always even
     while (!found) {
+        --i;
         bool prime = true;
         for (int j = 2; j * j < i; ++j)
             if (i % j == 0)
                 prime = false;
 
         if (prime) found = true;
-        else --i;
     }
 
     return i;
