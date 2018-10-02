@@ -50,15 +50,11 @@ private:
 			return (k + (j * j)) % size;
 		else if (probingMethod == 3) {
 			int q = prevPrime(size);
-			return (k + j * secondHash(k, q)) % size;
+			return ((k % size) + j * (q - (k % q))) % size;
 		} else {
 			exit(0);
 		}
 
-	}
-
-	int secondHash(int k, int q) const {                                 // double hash function
-		return q - (k % q);
 	}
 
 	int searchKeyIndex(int key) const;

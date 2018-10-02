@@ -11,7 +11,7 @@ using namespace std::chrono_literals;                                      // fo
 using std::chrono::system_clock;                                           // for sleep function
 
 
-const long int NUM_KEYS = 100000;                                          // number of keys used to compare efficiency
+const long int NUM_KEYS = 25000;                                          // number of keys used to compare efficiency
                                                                            // of collision resolution methods
 
 void wait() { 

@@ -55,17 +55,15 @@ void ProbingHashTable::insertKey(int key) {                        // function i
     while (!foundOpen && !cycled) {                                //  - while no open spots and no cycle
         hashedKey = hash(key, j);                                  //    - compute hash
 
-        if (j > size)                                              //    - check if cycled depending on probing method
+        if (j >= size)                                             //    - check if cycled depending on probing method
             cycled = true;
         else if (probingMethod == 2 && j >= (size + 1) / 2)
-            cycled = true;
-        else if (hashedKey < 0)
             cycled = true;
 
         if (HT[hashedKey] < 0)                                     //    - if empty or deleted
             foundOpen = true;                                      //      - insert
-        else                                                       //    - else
-            ++j;                                                   //      - increment j
+
+        ++j;                                                       //      - increment j
     }
 
     if (foundOpen) {                                               //  - if found open spot
@@ -82,7 +80,7 @@ bool ProbingHashTable::searchKey(int key) const {                  // function s
     else return false;
 }
 
-int ProbingHashTable::stepsBefore(int key) const {                 // function stepsTo
+int ProbingHashTable::stepsBefore(int key) const {                 // function stepsBefore
     bool found = false;
     bool done = false;
     int j = 0;
@@ -94,8 +92,7 @@ int ProbingHashTable::stepsBefore(int key) const {                 // function s
         if (HT[hashedKey] == key) {                                //   - if found our key
             found = true;                                          //     - found = true
             done = true;
-        }
-        else if (HT[hashedKey] == -1)                              //   - if hit empty index
+        } else if (HT[hashedKey] == -1)                            //   - if hit empty index
             done = true;
         else if (probingMethod == 2 && j == (size / 2) + 1)        //   - if cycled (quadratic)
             done = true;
